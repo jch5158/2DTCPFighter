@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="image">
+      <UniqueIdentifier>{769e2651-550c-445e-a934-c30e886c59e8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -45,6 +48,12 @@
     <ClInclude Include="CFrameSkip.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="protocol.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\OneDrive\바탕 화면\TCPFighter_network\PacketDefine.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="2DActionStripe.cpp">
@@ -68,6 +77,9 @@
     <ClCompile Include="CFrameSkip.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="protocol.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="2DActionStripe.rc">
@@ -80,6 +92,201 @@
     </Image>
     <Image Include="2DActionStripe.ico">
       <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="image\Attack1_R_03.bmp">
+      <Filter>image</Filter>
+    </Image>
+    <Image Include="image\Attack1_R_04.bmp">
+      <Filter>image</Filter>
+    </Image>
+    <Image Include="image\Attack2_L_01.bmp">
+      <Filter>image</Filter>
+    </Image>
+    <Image Include="image\Attack2_L_02.bmp">
+      <Filter>image</Filter>
+    </Image>
+    <Image Include="image\Attack2_L_03.bmp">
+      <Filter>image</Filter>
+    </Image>
+    <Image Include="image\Attack2_L_04.bmp">
+      <Filter>image</Filter>
+    </Image>
+    <Image Include="image\Attack2_R_01.bmp">
+      <Filter>image</Filter>
+    </Image>
+    <Image Include="image\Attack2_R_02.bmp">
+      <Filter>image</Filter>
+    </Image>
+    <Image Include="image\Attack2_R_03.bmp">
+      <Filter>image</Filter>
+    </Image>
+    <Image Include="image\Attack2_R_04.bmp">
+      <Filter>image</Filter>
+    </Image>
+    <Image Include="image\Attack3_L_01.bmp">
+      <Filter>image</Filter>
+    </Image>
+    <Image Include="image\Attack3_L_02.bmp">
+      <Filter>image</Filter>
+    </Image>
+    <Image Include="image\Attack3_L_03.bmp">
+      <Filter>image</Filter>
+    </Image>
+    <Image Include="image\Attack3_L_04.bmp">
+      <Filter>image</Filter>
+    </Image>
+    <Image Include="image\Attack3_L_05.bmp">
+      <Filter>image</Filter>
+    </Image>
+    <Image Include="image\Attack3_L_06.bmp">
+      <Filter>image</Filter>
+    </Image>
+    <Image Include="image\Attack3_R_01.bmp">
+      <Filter>image</Filter>
+    </Image>
+    <Image Include="image\Attack3_R_02.bmp">
+      <Filter>image</Filter>
+    </Image>
+    <Image Include="image\Attack3_R_03.bmp">
+      <Filter>image</Filter>
+    </Image>
+    <Image Include="image\Attack3_R_04.bmp">
+      <Filter>image</Filter>
+    </Image>
+    <Image Include="image\Attack3_R_05.bmp">
+      <Filter>image</Filter>
+    </Image>
+    <Image Include="image\Attack3_R_06.bmp">
+      <Filter>image</Filter>
+    </Image>
+    <Image Include="image\HPGuage.bmp">
+      <Filter>image</Filter>
+    </Image>
+    <Image Include="image\Move_L_01.bmp">
+      <Filter>image</Filter>
+    </Image>
+    <Image Include="image\Move_L_02.bmp">
+      <Filter>image</Filter>
+    </Image>
+    <Image Include="image\Move_L_03.bmp">
+      <Filter>image</Filter>
+    </Image>
+    <Image Include="image\Move_L_04.bmp">
+      <Filter>image</Filter>
+    </Image>
+    <Image Include="image\Move_L_05.bmp">
+      <Filter>image</Filter>
+    </Image>
+    <Image Include="image\Move_L_06.bmp">
+      <Filter>image</Filter>
+    </Image>
+    <Image Include="image\Move_L_07.bmp">
+      <Filter>image</Filter>
+    </Image>
+    <Image Include="image\Move_L_08.bmp">
+      <Filter>image</Filter>
+    </Image>
+    <Image Include="image\Move_L_09.bmp">
+      <Filter>image</Filter>
+    </Image>
+    <Image Include="image\Move_L_10.bmp">
+      <Filter>image</Filter>
+    </Image>
+    <Image Include="image\Move_L_11.bmp">
+      <Filter>image</Filter>
+    </Image>
+    <Image Include="image\Move_L_12.bmp">
+      <Filter>image</Filter>
+    </Image>
+    <Image Include="image\Move_R_01.bmp">
+      <Filter>image</Filter>
+    </Image>
+    <Image Include="image\Move_R_02.bmp">
+      <Filter>image</Filter>
+    </Image>
+    <Image Include="image\Move_R_03.bmp">
+      <Filter>image</Filter>
+    </Image>
+    <Image Include="image\Move_R_04.bmp">
+      <Filter>image</Filter>
+    </Image>
+    <Image Include="image\Move_R_05.bmp">
+      <Filter>image</Filter>
+    </Image>
+    <Image Include="image\Move_R_06.bmp">
+      <Filter>image</Filter>
+    </Image>
+    <Image Include="image\Move_R_07.bmp">
+      <Filter>image</Filter>
+    </Image>
+    <Image Include="image\Move_R_08.bmp">
+      <Filter>image</Filter>
+    </Image>
+    <Image Include="image\Move_R_09.bmp">
+      <Filter>image</Filter>
+    </Image>
+    <Image Include="image\Move_R_10.bmp">
+      <Filter>image</Filter>
+    </Image>
+    <Image Include="image\Move_R_11.bmp">
+      <Filter>image</Filter>
+    </Image>
+    <Image Include="image\Move_R_12.bmp">
+      <Filter>image</Filter>
+    </Image>
+    <Image Include="image\Shadow.bmp">
+      <Filter>image</Filter>
+    </Image>
+    <Image Include="image\Stand_L_01.bmp">
+      <Filter>image</Filter>
+    </Image>
+    <Image Include="image\Stand_L_02.bmp">
+      <Filter>image</Filter>
+    </Image>
+    <Image Include="image\Stand_L_03.bmp">
+      <Filter>image</Filter>
+    </Image>
+    <Image Include="image\Stand_R_01.bmp">
+      <Filter>image</Filter>
+    </Image>
+    <Image Include="image\Stand_R_02.bmp">
+      <Filter>image</Filter>
+    </Image>
+    <Image Include="image\Stand_R_03.bmp">
+      <Filter>image</Filter>
+    </Image>
+    <Image Include="image\xSpark_1.bmp">
+      <Filter>image</Filter>
+    </Image>
+    <Image Include="image\xSpark_2.bmp">
+      <Filter>image</Filter>
+    </Image>
+    <Image Include="image\xSpark_3.bmp">
+      <Filter>image</Filter>
+    </Image>
+    <Image Include="image\xSpark_4.bmp">
+      <Filter>image</Filter>
+    </Image>
+    <Image Include="image\_Map.bmp">
+      <Filter>image</Filter>
+    </Image>
+    <Image Include="image\Attack1_L_01.bmp">
+      <Filter>image</Filter>
+    </Image>
+    <Image Include="image\Attack1_L_02.bmp">
+      <Filter>image</Filter>
+    </Image>
+    <Image Include="image\Attack1_L_03.bmp">
+      <Filter>image</Filter>
+    </Image>
+    <Image Include="image\Attack1_L_04.bmp">
+      <Filter>image</Filter>
+    </Image>
+    <Image Include="image\Attack1_R_01.bmp">
+      <Filter>image</Filter>
+    </Image>
+    <Image Include="image\Attack1_R_02.bmp">
+      <Filter>image</Filter>
     </Image>
   </ItemGroup>
 </Project>

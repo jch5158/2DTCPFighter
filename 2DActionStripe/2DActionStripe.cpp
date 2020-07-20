@@ -1,6 +1,9 @@
 ﻿// 2DActionStripe.cpp : 애플리케이션에 대한 진입점을 정의합니다.
 //
 
+#define _CRT_SECURE_NO_WARNINGS
+#define _WINSOCK_DEPRECATED_NO_WARNINGS
+
 #include "framework.h"
 #include "2DActionStripe.h"
 #include "CList.h"
@@ -11,9 +14,12 @@
 #include "CBaseObject.h"
 #include "CPlayerObject.h"
 
+#define WM_NETWORK (WM_USER+1)
+
+#define SERVERPORT 5000
+#define SERVERIP L"127.0.0.1"
 
 #define MAX_LOADSTRING 100
-
 
 
 // 전역 변수:
@@ -42,10 +48,12 @@ RECT WindowRect;
 HDC hdc;
 
 // 윈도우 핸들
-HWND hWnd;
+HWND g_hWnd;
 
 // 윈도우 상태 체크
 bool windowActive;
+
+SOCKET clientSock;
 
 // 게임씬 바로 도입
 enum e_GameScene GameState = e_GameScene::GAME;
@@ -84,6 +92,60 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
     MSG msg;
 
+    AllocConsole();
+    freopen("CONOUT$", "r+t", stdout);
+
+    int retval;
+
+    WSADATA wsa;
+
+    if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0)
+    {
+        wprintf_s(L"wsastart up error : %d\n", WSAGetLastError());
+        return -1;
+    }
+
+
+    clientSock = socket(AF_INET, SOCK_STREAM, 0);
+    if (clientSock == INVALID_SOCKET)
+    {
+        wprintf_s(L"socket error : %d\n", WSAGetLastError());
+        return -1;
+    }
+
+    linger opt;
+    opt.l_onoff = 1;
+    opt.l_linger = 0;
+    retval = setsockopt(clientSock, SOL_SOCKET, SO_LINGER, (char*)&opt, sizeof(opt));
+    if (retval == SOCKET_ERROR) 
+    {
+        wprintf_s(L"setsockopt error : %d\n", WSAGetLastError());
+        return -1;
+    }
+
+    retval = WSAAsyncSelect(clientSock, g_hWnd, WM_NETWORK, FD_CONNECT | FD_READ | FD_WRITE | FD_CLOSE);
+    if (retval == SOCKET_ERROR)
+    {
+        wprintf_s(L"WSAAsync error : %d\n", WSAGetLastError());
+        return -1;
+    }
+
+    SOCKADDR_IN serverAddr;
+    ZeroMemory(&serverAddr, sizeof(serverAddr));
+
+    serverAddr.sin_family = AF_INET;
+    serverAddr.sin_port = htons(SERVERPORT);
+    InetPtonW(AF_INET, SERVERIP, &serverAddr.sin_addr);
+
+    retval = connect(clientSock, (SOCKADDR*)&serverAddr, sizeof(serverAddr));
+    if (retval == SOCKET_ERROR)
+    {
+        if (retval != WSAEWOULDBLOCK)
+        {
+            wprintf_s(L"connect error : %d\n", WSAGetLastError());
+            return -1;
+        }
+    }
 
     InitialGame();
 
@@ -131,7 +193,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 {
    hInst = hInstance; // 인스턴스 핸들을 전역 변수에 저장합니다.
 
-   hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
+   g_hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
       CW_USEDEFAULT, 0, 640, 480, nullptr, nullptr, hInstance, nullptr);
 
    WindowRect.top = 0;
@@ -139,7 +201,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
    WindowRect.right = 640;
    WindowRect.bottom = 480;
 
-   AdjustWindowRectEx(&WindowRect, GetWindowStyle(hWnd), GetMenu(hWnd) != NULL, GetWindowExStyle(hWnd));
+   AdjustWindowRectEx(&WindowRect, GetWindowStyle(g_hWnd), GetMenu(g_hWnd) != NULL, GetWindowExStyle(g_hWnd));
 
    int iX = (GetSystemMetrics(SM_CXSCREEN) / 2) - (640 / 2);
    int iY = (GetSystemMetrics(SM_CYSCREEN) / 2) - (480 / 2);
@@ -147,7 +209,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 
    MoveWindow
    (
-       hWnd,
+       g_hWnd,
        iX,
        iY,
        WindowRect.right - WindowRect.left,
@@ -155,13 +217,13 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
        true
    );
 
-   if (!hWnd)
+   if (!g_hWnd)
    {
       return FALSE;
    }
 
-   ShowWindow(hWnd, nCmdShow);
-   UpdateWindow(hWnd);
+   ShowWindow(g_hWnd, nCmdShow);
+   UpdateWindow(g_hWnd);
 
    return TRUE;
 }
@@ -170,81 +232,74 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 BOOL InitialGame(void) {
 
     // 이미지 가져오기
-    SpriteDib.LoadDibSprite(e_SPRITE::eMAP, "_Map.bmp", 0, 0);
+    SpriteDib.LoadDibSprite(e_SPRITE::eMAP, "image/_Map.bmp", 0, 0);
 
     
     // 이미지 가져오기
-    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_MOVE_L01, "Move_L_01.bmp", 71, 90);
-    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_MOVE_L02, "Move_L_02.bmp", 71, 90);
-    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_MOVE_L03, "Move_L_03.bmp", 71, 90);
-    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_MOVE_L04, "Move_L_04.bmp", 71, 90);
-    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_MOVE_L05, "Move_L_05.bmp", 71, 90);
-    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_MOVE_L06, "Move_L_06.bmp", 71, 90);
-    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_MOVE_L07, "Move_L_07.bmp", 71, 90);
-    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_MOVE_L08, "Move_L_08.bmp", 71, 90);
-    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_MOVE_L09, "Move_L_09.bmp", 71, 90);
-    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_MOVE_L10, "Move_L_10.bmp", 71, 90);
-    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_MOVE_L11, "Move_L_11.bmp", 71, 90);
-    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_MOVE_L12, "Move_L_12.bmp", 71, 90);
-    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_MOVE_R01, "Move_R_01.bmp", 71, 90);
-    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_MOVE_R02, "Move_R_02.bmp", 71, 90);
-    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_MOVE_R03, "Move_R_03.bmp", 71, 90);
-    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_MOVE_R04, "Move_R_04.bmp", 71, 90);
-    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_MOVE_R05, "Move_R_05.bmp", 71, 90);
-    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_MOVE_R06, "Move_R_06.bmp", 71, 90);
-    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_MOVE_R07, "Move_R_07.bmp", 71, 90);
-    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_MOVE_R08, "Move_R_08.bmp", 71, 90);
-    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_MOVE_R09, "Move_R_09.bmp", 71, 90);
-    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_MOVE_R10, "Move_R_10.bmp", 71, 90);
-    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_MOVE_R11, "Move_R_11.bmp", 71, 90);
-    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_MOVE_R12, "Move_R_12.bmp", 71, 90);
-    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_STAND_L01, "Stand_L_01.bmp", 71, 90);
-    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_STAND_L02, "Stand_L_02.bmp", 71, 90);
-    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_STAND_L03, "Stand_L_03.bmp", 71, 90);
-    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_STAND_L04, "Stand_L_02.bmp", 71, 90);
-    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_STAND_L05, "Stand_L_01.bmp", 71, 90);
-    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_STAND_R01, "Stand_R_01.bmp", 71, 90);
-    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_STAND_R02, "Stand_R_02.bmp", 71, 90);
-    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_STAND_R03, "Stand_R_03.bmp", 71, 90);
-    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_STAND_R04, "Stand_R_02.bmp", 71, 90);
-    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_STAND_R05, "Stand_R_01.bmp", 71, 90);
-
-    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_ATTACK1_L01, "Attack1_L_01.bmp", 71, 90);
-    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_ATTACK1_L02, "Attack1_L_02.bmp", 71, 90);
-    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_ATTACK1_L03, "Attack1_L_03.bmp", 71, 90);
-    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_ATTACK1_L04, "Attack1_L_04.bmp", 71, 90);
-                                                                                
-    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_ATTACK1_R01, "Attack1_R_01.bmp", 71, 90);
-    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_ATTACK1_R02, "Attack1_R_02.bmp", 71, 90);
-    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_ATTACK1_R03, "Attack1_R_03.bmp", 71, 90);
-    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_ATTACK1_R04, "Attack1_R_04.bmp", 71, 90);
-                                                                                
-    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_ATTACK2_L01, "Attack2_L_01.bmp", 71, 90);
-    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_ATTACK2_L02, "Attack2_L_02.bmp", 71, 90);
-    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_ATTACK2_L03, "Attack2_L_03.bmp", 71, 90);
-    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_ATTACK2_L04, "Attack2_L_04.bmp", 71, 90);
-                                                                                
-    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_ATTACK2_R01, "Attack2_R_01.bmp", 71, 90);
-    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_ATTACK2_R02, "Attack2_R_02.bmp", 71, 90);
-    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_ATTACK2_R03, "Attack2_R_03.bmp", 71, 90);
-    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_ATTACK2_R04, "Attack2_R_04.bmp", 71, 90);
-                                                                                
-    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_ATTACK3_L01, "Attack3_L_01.bmp", 71, 90);
-    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_ATTACK3_L02, "Attack3_L_02.bmp", 71, 90);
-    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_ATTACK3_L03, "Attack3_L_03.bmp", 71, 90);
-    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_ATTACK3_L04, "Attack3_L_04.bmp", 71, 90);
-    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_ATTACK3_L05, "Attack3_L_05.bmp", 71, 90);
-    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_ATTACK3_L06, "Attack3_L_06.bmp", 71, 90);
-                                                                                
-    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_ATTACK3_R01, "Attack3_R_01.bmp", 71, 90);
-    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_ATTACK3_R02, "Attack3_R_02.bmp", 71, 90);
-    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_ATTACK3_R03, "Attack3_R_03.bmp", 71, 90);
-    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_ATTACK3_R04, "Attack3_R_04.bmp", 71, 90);
-    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_ATTACK3_R05, "Attack3_R_05.bmp", 71, 90);
-    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_ATTACK3_R06, "Attack3_R_06.bmp", 71, 90);
-
-    SpriteDib.LoadDibSprite(e_SPRITE::eGUAGE_HP, "HPGuage.bmp", 0, 0);
-    SpriteDib.LoadDibSprite(e_SPRITE::eSHADOW, "Shadow.bmp", 32, 4);
+    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_MOVE_L01,    "image/Move_L_01.bmp", 71, 90);
+    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_MOVE_L02,    "image/Move_L_02.bmp", 71, 90);
+    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_MOVE_L03,    "image/Move_L_03.bmp", 71, 90);
+    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_MOVE_L04,    "image/Move_L_04.bmp", 71, 90);
+    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_MOVE_L05,    "image/Move_L_05.bmp", 71, 90);
+    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_MOVE_L06,    "image/Move_L_06.bmp", 71, 90);
+    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_MOVE_L07,    "image/Move_L_07.bmp", 71, 90);
+    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_MOVE_L08,    "image/Move_L_08.bmp", 71, 90);
+    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_MOVE_L09,    "image/Move_L_09.bmp", 71, 90);
+    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_MOVE_L10,    "image/Move_L_10.bmp", 71, 90);
+    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_MOVE_L11,    "image/Move_L_11.bmp", 71, 90);
+    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_MOVE_L12,    "image/Move_L_12.bmp", 71, 90);
+    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_MOVE_R01,    "image/Move_R_01.bmp", 71, 90);
+    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_MOVE_R02,    "image/Move_R_02.bmp", 71, 90);
+    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_MOVE_R03,    "image/Move_R_03.bmp", 71, 90);
+    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_MOVE_R04,    "image/Move_R_04.bmp", 71, 90);
+    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_MOVE_R05,    "image/Move_R_05.bmp", 71, 90);
+    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_MOVE_R06,    "image/Move_R_06.bmp", 71, 90);
+    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_MOVE_R07,    "image/Move_R_07.bmp", 71, 90);
+    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_MOVE_R08,    "image/Move_R_08.bmp", 71, 90);
+    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_MOVE_R09,    "image/Move_R_09.bmp", 71, 90);
+    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_MOVE_R10,    "image/Move_R_10.bmp", 71, 90);
+    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_MOVE_R11,    "image/Move_R_11.bmp", 71, 90);
+    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_MOVE_R12,    "image/Move_R_12.bmp", 71, 90);
+    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_STAND_L01,   "image/Stand_L_01.bmp", 71, 90);
+    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_STAND_L02,   "image/Stand_L_02.bmp", 71, 90);
+    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_STAND_L03,   "image/Stand_L_03.bmp", 71, 90);
+    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_STAND_L04,   "image/Stand_L_02.bmp", 71, 90);
+    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_STAND_L05,   "image/Stand_L_01.bmp", 71, 90);
+    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_STAND_R01,   "image/Stand_R_01.bmp", 71, 90);
+    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_STAND_R02,   "image/Stand_R_02.bmp", 71, 90);
+    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_STAND_R03,   "image/Stand_R_03.bmp", 71, 90);
+    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_STAND_R04,   "image/Stand_R_02.bmp", 71, 90);
+    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_STAND_R05,   "image/Stand_R_01.bmp", 71, 90);
+    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_ATTACK1_L01, "image/Attack1_L_01.bmp", 71, 90);
+    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_ATTACK1_L02, "image/Attack1_L_02.bmp", 71, 90);
+    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_ATTACK1_L03, "image/Attack1_L_03.bmp", 71, 90);
+    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_ATTACK1_L04, "image/Attack1_L_04.bmp", 71, 90);
+    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_ATTACK1_R01, "image/Attack1_R_01.bmp", 71, 90);
+    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_ATTACK1_R02, "image/Attack1_R_02.bmp", 71, 90);
+    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_ATTACK1_R03, "image/Attack1_R_03.bmp", 71, 90);
+    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_ATTACK1_R04, "image/Attack1_R_04.bmp", 71, 90);
+    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_ATTACK2_L01, "image/Attack2_L_01.bmp", 71, 90);
+    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_ATTACK2_L02, "image/Attack2_L_02.bmp", 71, 90);
+    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_ATTACK2_L03, "image/Attack2_L_03.bmp", 71, 90);
+    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_ATTACK2_L04, "image/Attack2_L_04.bmp", 71, 90);
+    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_ATTACK2_R01, "image/Attack2_R_01.bmp", 71, 90);
+    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_ATTACK2_R02, "image/Attack2_R_02.bmp", 71, 90);
+    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_ATTACK2_R03, "image/Attack2_R_03.bmp", 71, 90);
+    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_ATTACK2_R04, "image/Attack2_R_04.bmp", 71, 90);
+    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_ATTACK3_L01, "image/Attack3_L_01.bmp", 71, 90);
+    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_ATTACK3_L02, "image/Attack3_L_02.bmp", 71, 90);
+    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_ATTACK3_L03, "image/Attack3_L_03.bmp", 71, 90);
+    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_ATTACK3_L04, "image/Attack3_L_04.bmp", 71, 90);
+    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_ATTACK3_L05, "image/Attack3_L_05.bmp", 71, 90);
+    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_ATTACK3_L06, "image/Attack3_L_06.bmp", 71, 90);
+    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_ATTACK3_R01, "image/Attack3_R_01.bmp", 71, 90);
+    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_ATTACK3_R02, "image/Attack3_R_02.bmp", 71, 90);
+    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_ATTACK3_R03, "image/Attack3_R_03.bmp", 71, 90);
+    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_ATTACK3_R04, "image/Attack3_R_04.bmp", 71, 90);
+    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_ATTACK3_R05, "image/Attack3_R_05.bmp", 71, 90);
+    SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_ATTACK3_R06, "image/Attack3_R_06.bmp", 71, 90);
+    SpriteDib.LoadDibSprite(e_SPRITE::eGUAGE_HP,           "image/HPGuage.bmp", 0, 0);
+    SpriteDib.LoadDibSprite(e_SPRITE::eSHADOW,             "image/Shadow.bmp", 32, 4);
     
     
     //playerObj->SetHp(70);
@@ -305,7 +360,7 @@ BOOL Render(void)
         iter->Render(); 
     } 
 
-    ScreenDib.Filp(hWnd);
+    ScreenDib.Filp(g_hWnd);
 
     return true;
 }
@@ -319,7 +374,7 @@ void Update(void) {
         iter->Update();
     }
 
-    frameSkip.UpdateCheck(hWnd);
+    frameSkip.UpdateCheck(g_hWnd);
 
 }
 
@@ -392,6 +447,31 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     switch (message)
     {
+    case WM_NETWORK:
+
+        if (WSAGETSELECTERROR(lParam))
+        {
+            closesocket(wParam);
+            return -1;
+        }
+
+        switch (WSAGETSELECTEVENT(lParam))
+        {
+        case FD_CONNECT:
+            
+            break;
+        case FD_READ:
+            
+            break;
+        case FD_WRITE:
+            
+            break;
+        case FD_CLOSE:
+
+            break;
+        }
+
+        break;
     case WM_PAINT:
         {
             PAINTSTRUCT ps;
