@@ -46,7 +46,7 @@ enum e_GameScene { TITLE = 0, GAME };
 
 enum e_ObjType { eType_Player = 0, eTypeEffect };
 
-enum e_PlayerDir {eRight,eLeft};
+enum e_PlayerDir {eLeft = 0, eRight = 4};
 
 enum e_SPRITE
 {

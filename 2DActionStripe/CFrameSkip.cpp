@@ -15,6 +15,7 @@ CFrameSkip::~CFrameSkip()
 
 }
 
+// 로직 프레임 텍스트 출력
 bool CFrameSkip::UpdateCheck(HWND hWnd) {
 
 	static DWORD frameCheck = 50;

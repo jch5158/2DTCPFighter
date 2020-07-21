@@ -13,7 +13,11 @@ public:
 	int GetY();
 
 	// KeyProcess() 에서 입력값을 받습니다.
+    // 어떤 액션을 할지 캐릭터 객체 멤버변수에 셋팅해준다. 
 	void ActionInput(DWORD dwAction);
+
+	// 캐릭터의 위치를 셋팅해주는 함수입니다.
+	void SetPosition(int iXpos, int iYpos);
 
 	void SetSprite(DWORD dwSpriteStart, DWORD dwSpriteMax, DWORD dwFrameDelay);
 
@@ -31,7 +35,6 @@ public:
 
 	virtual void Update() = 0;
 
-	void SetPosition(int iXpos,int iYpos);
 
 
 public:
@@ -63,9 +66,10 @@ public:
 	// 끝 스프라이트 값
 	DWORD m_dwSpriteEnd;
 	
+	// 오브젝트 ID
 	DWORD m_dwObjectID;
 
-	//
+	// 적군일지 아군일지 
 	DWORD m_ObjectType;
 };
 

@@ -76,6 +76,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
     // TODO: 여기에 코드를 입력합니다.
 
+    timeBeginPeriod(1);
     
     // 전역 문자열을 초기화합니다.
     LoadStringW(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
@@ -137,7 +138,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     serverAddr.sin_port = htons(SERVERPORT);
     InetPtonW(AF_INET, SERVERIP, &serverAddr.sin_addr);
 
-    retval = connect(clientSock, (SOCKADDR*)&serverAddr, sizeof(serverAddr));
+  /*  retval = connect(clientSock, (SOCKADDR*)&serverAddr, sizeof(serverAddr));
     if (retval == SOCKET_ERROR)
     {
         if (retval != WSAEWOULDBLOCK)
@@ -145,7 +146,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             wprintf_s(L"connect error : %d\n", WSAGetLastError());
             return -1;
         }
-    }
+    }*/
 
     InitialGame();
 
@@ -165,6 +166,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         }
     }
 
+    timeEndPeriod(1);
     return (int) msg.wParam;
 }
 
@@ -298,6 +300,12 @@ BOOL InitialGame(void) {
     SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_ATTACK3_R04, "image/Attack3_R_04.bmp", 71, 90);
     SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_ATTACK3_R05, "image/Attack3_R_05.bmp", 71, 90);
     SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_ATTACK3_R06, "image/Attack3_R_06.bmp", 71, 90);
+
+    SpriteDib.LoadDibSprite(e_SPRITE::eEFFECT_SPARK_01, "image/xSpark1.bmp", 71, 90);
+    SpriteDib.LoadDibSprite(e_SPRITE::eEFFECT_SPARK_02, "image/xSpark2.bmp", 71, 90);
+    SpriteDib.LoadDibSprite(e_SPRITE::eEFFECT_SPARK_03, "image/xSpark3.bmp", 71, 90);
+    SpriteDib.LoadDibSprite(e_SPRITE::eEFFECT_SPARK_04, "image/xSpark4.bmp", 71, 90);
+
     SpriteDib.LoadDibSprite(e_SPRITE::eGUAGE_HP,           "image/HPGuage.bmp", 0, 0);
     SpriteDib.LoadDibSprite(e_SPRITE::eSHADOW,             "image/Shadow.bmp", 32, 4);
     
@@ -307,27 +315,18 @@ BOOL InitialGame(void) {
 
     objList.PushBack(playerObj);
 
-    CBaseObject* playerObjEnemy; 
-    playerObjEnemy = new CPlayerObject(); 
-    playerObjEnemy->SetPosition(150, 150);
-    objList.PushBack(playerObjEnemy);
+    //CBaseObject* playerObjEnemy; 
 
-    
- 
-    playerObjEnemy = new CPlayerObject();
-    playerObjEnemy->SetPosition(500, 150);
-    objList.PushBack(playerObjEnemy);
+    //// 캐릭터 오브젝트를 생성한다.
+    //playerObjEnemy = new CPlayerObject(); 
+   
+    //// 생성한 캐릭터의 좌표를 설정한다.
+    //playerObjEnemy->SetPosition(150, 150);
+   
+    //// 이터레이터에 생성한 캐릭터 오브젝트를 푸쉬한다.
+    //objList.PushBack(playerObjEnemy);
 
-    playerObjEnemy = new CPlayerObject();
-    playerObjEnemy->SetPosition(400, 300);
-    objList.PushBack(playerObjEnemy);
-
-    playerObjEnemy = new CPlayerObject();
-    playerObjEnemy->SetPosition(150, 400);
-    objList.PushBack(playerObjEnemy);
-
-
-
+   
 
     return true;
 }
@@ -374,8 +373,9 @@ void Update(void) {
         iter->Update();
     }
 
-    frameSkip.UpdateCheck(g_hWnd);
 
+    // 로직 프레임 텍스트 출력
+    frameSkip.UpdateCheck(g_hWnd);
 }
 
 void KeyProcess() {
@@ -424,7 +424,6 @@ void KeyProcess() {
         dwAction = KeyList::eACTION_MOVE_LD;
     }
 
-
     if (GetAsyncKeyState(0x5A))
     {
         dwAction = KeyList::eACTION_ATTACK1;
@@ -440,6 +439,8 @@ void KeyProcess() {
         dwAction = KeyList::eACTION_ATTACK3;
     }
 
+    // KeyProcess() 에서 입력값을 받습니다.
+    // 어떤 액션을 할지 캐릭터 객체 멤버변수에 셋팅해준다. 
     playerObj->ActionInput(dwAction);
 }
 
@@ -514,20 +515,21 @@ VOID MainUpdate(void)
 BOOL UpdateGame(void)
 {
 
+    // 키 입력
     if (windowActive)
     {
         KeyProcess();
     }
 
+    // 업데이트
     Update();
 
-    if (frameSkip.FrameSkip()){
-    Render();
+
+    // 렌더
+    if (frameSkip.FrameSkip())
+    {
+        Render();
     } 
-
-    //백버퍼에 그려진 것은 filp한다.
-     
-
 
      Sleep(0);
      

@@ -24,8 +24,6 @@ public:
 	// 지금 입력받은 메시지
 	DWORD m_dwActionCur;
 
-	// 그 전에 입력받은 메시지
-	DWORD m_dwActionOld;
 
 	// 방향 오른쪽 디폴트
 	DWORD m_dwDirCur;
