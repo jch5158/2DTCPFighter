@@ -133,7 +133,7 @@ void CSpriteDib::ReleaseStrite(int iSpriteIndex)
 }
 
 // 스프라이트 정보를 백버퍼에 그리는 함수입니다.
-void CSpriteDib::DrawSprite(int iSpriteIndex, int iDrawX, int iDrawY, BYTE* bytDest, int iDestWidth, int iDestHeight, int iDestPitch, int iDrawLen)
+void CSpriteDib::DrawSprite(int iSpriteIndex, short iDrawX, short iDrawY, BYTE* bytDest, int iDestWidth, int iDestHeight, int iDestPitch, int iDrawLen)
 {
 	// 인자값이 배열의 최대 길이보다 클 경우 return
 	if (iSpriteIndex >= m_iMaxSprite)
@@ -261,7 +261,7 @@ void CSpriteDib::DrawSprite(int iSpriteIndex, int iDrawX, int iDrawY, BYTE* bytD
 }
 
 // 배경용 스프라이트 정보를 백버퍼에 그리는 함수입니다.
-void CSpriteDib::DrawImage(int iSpriteIndex, int iDrawX, int iDrawY, BYTE* bytDest, int iDestWidth, int iDestHeight, int iDestPitch, int iDrawLen) {
+void CSpriteDib::DrawImage(int iSpriteIndex,  short iDrawX,  short iDrawY, BYTE* bytDest, int iDestWidth, int iDestHeight, int iDestPitch, int iDrawLen) {
 	
 	if (iSpriteIndex >= m_iMaxSprite)
 		return;

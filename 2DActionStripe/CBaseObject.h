@@ -8,9 +8,9 @@ public:
 
 	~CBaseObject();
 	
-	int GetX();
+	unsigned int GetX();
 
-	int GetY();
+	unsigned int GetY();
 
 	// KeyProcess() 에서 입력값을 받습니다.
     // 어떤 액션을 할지 캐릭터 객체 멤버변수에 셋팅해준다. 
@@ -46,9 +46,9 @@ public:
 	// 사용자 입력값 저장하는 멤버변수.
 	DWORD m_ActionInput;
 
-	int m_iXpos;
+	unsigned int m_iXpos;
 
-	int m_iYpos;
+	unsigned int m_iYpos;
 
 	// 딜레이 카운트가 어느정도 되었는지 프레임 딜레이와의 체크
 	DWORD m_dwDelayCount;
@@ -71,6 +71,16 @@ public:
 
 	// 적군일지 아군일지 
 	DWORD m_ObjectType;
+
+	// 방향 오른쪽 디폴트
+	DWORD m_dwDirCur;
+
+	// 예전 방향
+	DWORD m_dwDirOld;
+
+	// 캐릭터 hp
+	unsigned char m_chHP;
+
 };
 
 // 백 버퍼의 가로 세로 길이 그리고 32 컬러비트

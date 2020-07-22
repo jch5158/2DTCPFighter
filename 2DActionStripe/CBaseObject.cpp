@@ -61,12 +61,12 @@ CBaseObject::CBaseObject() {
 CBaseObject::~CBaseObject() {}
 
 
-int CBaseObject::GetX() 
+unsigned int CBaseObject::GetX() 
 {
 	return this->m_iXpos;
 }
 
-int CBaseObject::GetY() 
+unsigned int CBaseObject::GetY() 
 {
 	return this->m_iYpos;
 }

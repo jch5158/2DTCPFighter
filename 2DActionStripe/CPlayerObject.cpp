@@ -39,8 +39,11 @@ void CPlayerObject::ActionProc()
 				SetSprite(e_SPRITE::ePLAYER_STAND_L01, e_SPRITE::ePLAYER_STAND_L_MAX, 5);
 			}
 					
+
 			// 멈추고 다음 동작
+			this->m_ActionInput = KeyList::eACTION_STAND;
 			this->m_dwActionCur = KeyList::eACTION_STAND;
+			
 		}	
 	
 		break;
@@ -391,7 +394,7 @@ void CPlayerObject::Render()
 }
 
 // 체력을 셋팅해주는 함수입니다. 
-void CPlayerObject::SetHp(DWORD Hp)
+void CPlayerObject::SetHp(BYTE Hp)
 {
 	this->m_chHP = Hp;
 }

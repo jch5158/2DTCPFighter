@@ -143,15 +143,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\..\OneDrive\바탕 화면\TCPFighter_network\PacketDefine.h" />
     <ClInclude Include="2DActionStripe.h" />
     <ClInclude Include="CBaseObject.h" />
     <ClInclude Include="CFrameSkip.h" />
     <ClInclude Include="CList.h" />
     <ClInclude Include="CPlayerObject.h" />
+    <ClInclude Include="CRingBuffer.h" />
     <ClInclude Include="CScreenDib.h" />
     <ClInclude Include="CSpriteDib.h" />
     <ClInclude Include="framework.h" />
+    <ClInclude Include="PacketDefine.h" />
     <ClInclude Include="protocol.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="targetver.h" />
@@ -162,6 +163,7 @@
     <ClCompile Include="CFrameSkip.cpp" />
     <ClCompile Include="CList.cpp" />
     <ClCompile Include="CPlayerObject.cpp" />
+    <ClCompile Include="CRingBuffer.cpp" />
     <ClCompile Include="CScreenDib.cpp" />
     <ClCompile Include="CSpriteDib.cpp" />
     <ClCompile Include="protocol.cpp" />

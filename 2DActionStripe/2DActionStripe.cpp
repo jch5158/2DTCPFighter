@@ -5,9 +5,10 @@
 #define _WINSOCK_DEPRECATED_NO_WARNINGS
 
 #include "framework.h"
+#include "protocol.h"
 #include "2DActionStripe.h"
+#include "CRingBuffer.h"
 #include "CList.h"
-
 #include "CFrameSkip.h"
 #include "CSpriteDib.h"
 #include "CScreenDib.h"
@@ -21,6 +22,17 @@
 
 #define MAX_LOADSTRING 100
 
+struct Session
+{
+    SOCKET g_Socket;
+    CRingBuffer g_RecvQ;
+    CRingBuffer g_SendQ;
+    bool g_ConnectCheck;
+};
+
+
+Session session;
+
 
 // 전역 변수:
 HINSTANCE hInst;                                // 현재 인스턴스입니다.
@@ -31,14 +43,53 @@ WCHAR szWindowClass[MAX_LOADSTRING];            // 기본 창 클래스 이름�
 ATOM                MyRegisterClass(HINSTANCE hInstance);
 BOOL                InitInstance(HINSTANCE, int);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
+
 VOID                MainUpdate(void);
 BOOL                InitialGame(void);
+
+
+// 네트워크 관련 함수입니다.
+//==================================================================
+
+// client socket 분기문입니다.
+BOOL NetworkProc(WPARAM wParam, LPARAM lParam);
+
+// read event 를 발생시키는 함수입니다.
+BOOL ReadEvent();
+
+// send를 처리하는 함수입니다. 
+BOOL SendEvent();
+
+// recv 데이터를 분기하여 처리하는 함수입니다. 
+void PacketProc(BYTE byPacketType, char* Packet);
+
+bool PacketProcCreateCharacter(char* Packet);
+
+bool PacketProcCreateOtherCharacter(char* Packet);
+
+bool PacketProcDeleteCharacter(char* Packet);
+
+bool PacketProcOtherCharacterMoveStart(char* Packet);
+
+bool PacketProcOtherCharacterMoveStop(char* Packet);
+
+bool PacketProcScAttack1(char* Packet);
+
+bool PacketProcScAttack2(char* Packet);
+
+bool PacketProcScAttack3(char* Packet);
+
+bool PacketProcDamage(char* Packet);
+
+bool PacketProcScSync(char* Packet);
+
+// ================================================================
+
+
 BOOL UpdateGame(void);
 BOOL Render(void);
 void Update(void);
-
 void BubbleSort();
-
 void KeyProcess();
 
 // 윈도우 크기 렉트
@@ -53,18 +104,19 @@ HWND g_hWnd;
 // 윈도우 상태 체크
 bool windowActive;
 
-SOCKET clientSock;
 
 // 게임씬 바로 도입
 enum e_GameScene GameState = e_GameScene::GAME;
 
-static DWORD timeCur;
 
 CPlayerObject* playerObj = new CPlayerObject;
 
 CList<CBaseObject*> objList;
 
+// 프레임 스킵 함수를 호출하는 객체입니다.
 CFrameSkip frameSkip;
+
+
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
@@ -96,6 +148,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     AllocConsole();
     freopen("CONOUT$", "r+t", stdout);
 
+    
     int retval;
 
     WSADATA wsa;
@@ -107,8 +160,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     }
 
 
-    clientSock = socket(AF_INET, SOCK_STREAM, 0);
-    if (clientSock == INVALID_SOCKET)
+    session.g_Socket = socket(AF_INET, SOCK_STREAM, 0);
+    if (session.g_Socket == INVALID_SOCKET)
     {
         wprintf_s(L"socket error : %d\n", WSAGetLastError());
         return -1;
@@ -117,14 +170,14 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     linger opt;
     opt.l_onoff = 1;
     opt.l_linger = 0;
-    retval = setsockopt(clientSock, SOL_SOCKET, SO_LINGER, (char*)&opt, sizeof(opt));
+    retval = setsockopt(session.g_Socket, SOL_SOCKET, SO_LINGER, (char*)&opt, sizeof(opt));
     if (retval == SOCKET_ERROR) 
     {
         wprintf_s(L"setsockopt error : %d\n", WSAGetLastError());
         return -1;
     }
 
-    retval = WSAAsyncSelect(clientSock, g_hWnd, WM_NETWORK, FD_CONNECT | FD_READ | FD_WRITE | FD_CLOSE);
+    retval = WSAAsyncSelect(session.g_Socket, g_hWnd, WM_NETWORK, FD_CONNECT | FD_READ | FD_WRITE | FD_CLOSE);
     if (retval == SOCKET_ERROR)
     {
         wprintf_s(L"WSAAsync error : %d\n", WSAGetLastError());
@@ -133,20 +186,19 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
     SOCKADDR_IN serverAddr;
     ZeroMemory(&serverAddr, sizeof(serverAddr));
-
     serverAddr.sin_family = AF_INET;
     serverAddr.sin_port = htons(SERVERPORT);
     InetPtonW(AF_INET, SERVERIP, &serverAddr.sin_addr);
 
-  /*  retval = connect(clientSock, (SOCKADDR*)&serverAddr, sizeof(serverAddr));
+    retval = connect(session.g_Socket, (SOCKADDR*)&serverAddr, sizeof(serverAddr));
     if (retval == SOCKET_ERROR)
     {
-        if (retval != WSAEWOULDBLOCK)
+        if (WSAGetLastError() != WSAEWOULDBLOCK)
         {
             wprintf_s(L"connect error : %d\n", WSAGetLastError());
             return -1;
         }
-    }*/
+    }
 
     InitialGame();
 
@@ -162,7 +214,10 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         }
         else
         {
-            MainUpdate();
+            if (session.g_ConnectCheck)
+            {
+               MainUpdate();
+            }
         }
     }
 
@@ -310,12 +365,12 @@ BOOL InitialGame(void) {
     SpriteDib.LoadDibSprite(e_SPRITE::eSHADOW,             "image/Shadow.bmp", 32, 4);
     
     
-    //playerObj->SetHp(70);
-    playerObj->SetPosition(320, 240);
+    /*playerObj->SetPosition(320, 240);
 
     objList.PushBack(playerObj);
+*/
 
-    //CBaseObject* playerObjEnemy; 
+//    CBaseObject* playerObjEnemy; 
 
     //// 캐릭터 오브젝트를 생성한다.
     //playerObjEnemy = new CPlayerObject(); 
@@ -324,9 +379,7 @@ BOOL InitialGame(void) {
     //playerObjEnemy->SetPosition(150, 150);
    
     //// 이터레이터에 생성한 캐릭터 오브젝트를 푸쉬한다.
-    //objList.PushBack(playerObjEnemy);
-
-   
+    //objList.PushBack(playerObjEnemy); 
 
     return true;
 }
@@ -354,7 +407,7 @@ BOOL Render(void)
     
     CList<CBaseObject*>::Iterator iterE = objList.end();
 
-    for (CList<CBaseObject*>::Iterator iter = objList.begin(); iter != iterE; iter++)
+    for (CList<CBaseObject*>::Iterator iter = objList.begin(); iter != iterE; ++iter)
     {
         iter->Render(); 
     } 
@@ -368,7 +421,7 @@ void Update(void) {
 
     CList<CBaseObject*>::Iterator iterE = objList.end();
 
-    for (CList<CBaseObject*>::Iterator iter = objList.begin(); iter != iterE; iter++)
+    for (CList<CBaseObject*>::Iterator iter = objList.begin(); iter != iterE; ++iter)
     {
         iter->Update();
     }
@@ -450,26 +503,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     {
     case WM_NETWORK:
 
-        if (WSAGETSELECTERROR(lParam))
+        if (!NetworkProc(wParam, lParam))
         {
-            closesocket(wParam);
-            return -1;
-        }
-
-        switch (WSAGETSELECTEVENT(lParam))
-        {
-        case FD_CONNECT:
-            
-            break;
-        case FD_READ:
-            
-            break;
-        case FD_WRITE:
-            
-            break;
-        case FD_CLOSE:
-
-            break;
+            MessageBox(hWnd, L"접속이 종료되었습니다.", L"끊겼지롱", MB_OK); 
         }
 
         break;
@@ -536,16 +572,407 @@ BOOL UpdateGame(void)
      return true;
 }
 
+BOOL NetworkProc(WPARAM wParam, LPARAM lParam)
+{
+    if (WSAGETSELECTERROR(lParam))
+    {
+        closesocket(wParam);
+        session.g_ConnectCheck = false;
+        return false;
+    }
+
+    switch (WSAGETSELECTEVENT(lParam))
+    {
+    case FD_CONNECT: 
+        session.g_ConnectCheck = true;
+
+        return true;
+    case FD_CLOSE:
+        
+        closesocket(wParam);
+        session.g_ConnectCheck = false;
+
+        return true;
+    case FD_READ:
+        
+        ReadEvent();
+
+        return true;
+    case FD_WRITE:
+
+        SendEvent();
+    
+        return true;
+    }
+
+    return true;
+}
+
+BOOL ReadEvent()
+{
+    int retval;
+
+    int bufferRetval;
+
+    char buffer[9900];
+
+    retval = recv(session.g_Socket, buffer, sizeof(buffer), 0);
+    if (retval == SOCKET_ERROR)
+    {
+        if (WSAGetLastError() != WSAEWOULDBLOCK)
+        {
+            printf_s("recv error : %d\n", WSAGetLastError());
+            session.g_ConnectCheck = false;
+            closesocket(session.g_Socket);
+            return false;
+        }
+        return true;
+    }
+
+
+    bufferRetval = session.g_RecvQ.Enqueue(buffer, retval);
+    if (bufferRetval != retval)
+    {
+        printf_s("recv enqueue size error \n");
+        session.g_ConnectCheck = false;
+        closesocket(session.g_Socket);
+        return false;
+    }
+
+    char msgBuffer[100];
+
+    while (1)
+    {
+
+        if (3 > session.g_RecvQ.GetUseSize())
+        {
+            return true;
+        }
+
+        bufferRetval = session.g_RecvQ.Peek(msgBuffer,3);
+        if (bufferRetval != 3)
+        {
+            printf_s("peek error\n");
+            session.g_ConnectCheck = false;
+            closesocket(session.g_Socket);
+            return false;
+        }
+
+        if ((BYTE)msgBuffer[0] != 0x89)
+        {
+            printf_s("header code error : %d\n", msgBuffer[0]);
+            session.g_ConnectCheck = false;
+            closesocket(session.g_Socket);
+            return false;
+        }
+
+        if (msgBuffer[1] > session.g_RecvQ.GetUseSize())
+        {
+            return true;
+        }
+
+        session.g_RecvQ.MoveFront(3);
+
+        bufferRetval = session.g_RecvQ.Dequeue(&msgBuffer[3], msgBuffer[1]);
+        if (bufferRetval != msgBuffer[1])
+        {
+            printf_s("header code error\n");
+            session.g_ConnectCheck = false;
+            closesocket(session.g_Socket);
+            return false;
+        }
+
+        PacketProc(msgBuffer[2], &msgBuffer[3]);
+
+    }
+
+    return true;
+}
+
+BOOL SendEvent()
+{
+    char buffer[9900];
+
+    return true;
+}
+
+
+void PacketProc(BYTE byPacketType, char* Packet)
+{
+    switch (byPacketType)
+    {
+    case dfPACKET_SC_CREATE_MY_CHARACTER:
+
+        PacketProcCreateCharacter(Packet);
+
+        break;
+    case dfPACKET_SC_CREATE_OTHER_CHARACTER:
+
+        PacketProcCreateOtherCharacter(Packet);
+
+        break;
+    case dfPACKET_SC_DELETE_CHARACTER:
+
+        PacketProcDeleteCharacter(Packet);
+
+        break;
+    case dfPACKET_SC_MOVE_START:
+
+        PacketProcOtherCharacterMoveStart(Packet);
+
+        break;
+    case dfPACKET_SC_MOVE_STOP:
+
+        PacketProcOtherCharacterMoveStop(Packet);
+
+        break;
+    case dfPACKET_SC_ATTACK1:
+
+        PacketProcScAttack1(Packet);
+
+        break;
+    case dfPACKET_SC_ATTACK2:
+
+        PacketProcScAttack2(Packet);
+
+        break;
+    case dfPACKET_SC_ATTACK3:
+
+        PacketProcScAttack3(Packet);
+
+        break;
+    case dfPACKET_SC_DAMAGE:
+
+        PacketProcDamage(Packet);
+
+        break;
+    case dfPACKET_SC_SYNC:
+
+        PacketProcScSync(Packet);
+
+        break;
+    default:
+        break;
+    }
+
+}
+
+bool PacketProcCreateCharacter(char* Packet)
+{
+    stPacketCreateMyCharacter *CreateMyCharacter = (stPacketCreateMyCharacter*)Packet;
+
+    // ID 셋팅
+    playerObj->m_dwObjectID = CreateMyCharacter->dwID;
+    
+    // 체력 셋팅
+    playerObj->m_chHP = CreateMyCharacter->byHP;
+
+    // 방향 셋팅
+    playerObj->m_dwDirOld = CreateMyCharacter->byDirection;
+    playerObj->m_dwDirCur = CreateMyCharacter->byDirection;
+
+    // 좌표 셋팅
+    playerObj->m_iXpos = CreateMyCharacter->usX;
+    playerObj->m_iYpos = CreateMyCharacter->usY;
+    
+    // 이터레이터 푸쉬
+    objList.PushBack(playerObj);
+
+    return true;
+}
+
+bool PacketProcCreateOtherCharacter(char* Packet)
+{
+    CPlayerObject *enemyPlayer = new CPlayerObject;
+
+    stPacketCreateOtherCharacter *CreateMyCharacter = (stPacketCreateOtherCharacter*)Packet;
+
+    // 아이디 셋팅
+    enemyPlayer->m_dwObjectID = CreateMyCharacter->dwID;
+    
+    // 체력 셋팅
+    enemyPlayer->m_chHP = CreateMyCharacter->byHP;
+
+    // 방향 셋팅
+    enemyPlayer->m_dwDirOld = CreateMyCharacter->byDirection;
+    enemyPlayer->m_dwDirCur = CreateMyCharacter->byDirection;
+
+    // 좌표 셋팅
+    enemyPlayer->m_iXpos = CreateMyCharacter->usX;
+    enemyPlayer->m_iYpos = CreateMyCharacter->usY;
+
+    // 이터레이터 푸쉬
+    objList.PushBack(enemyPlayer);
+
+    return true;
+}
+
+bool PacketProcDeleteCharacter(char* Packet)
+{
+    stPacketDeleteCharacter *deleteCharacter = (stPacketDeleteCharacter*)Packet;
+
+    CList<CBaseObject*>::Iterator iterE = objList.end();
+
+    for (CList<CBaseObject*>::Iterator iter = objList.begin(); iter != iterE; ++iter)
+    {
+        if (iter->m_dwObjectID == deleteCharacter->dwID)
+        {
+            delete (*iter)->data;
+            objList.erase(iter);
+            return true;
+        }
+    } 
+}
+
+bool PacketProcOtherCharacterMoveStart(char* Packet)
+{
+    stPacketScMoveStart *PacketScMoveStart = (stPacketScMoveStart*)Packet;
+
+    CList<CBaseObject*>::Iterator iterE = objList.end();
+
+    for (CList<CBaseObject*>::Iterator iter = objList.begin(); iter != iterE; ++iter)
+    {
+        if (iter->m_dwObjectID == PacketScMoveStart->dwID)
+        {
+            iter->m_ActionInput = PacketScMoveStart->byDirection;
+            printf_s("%d, %d\n", KeyList::eACTION_MOVE_LU, PacketScMoveStart->byDirection);
+
+            iter->m_iXpos = PacketScMoveStart->usX;
+            iter->m_iYpos = PacketScMoveStart->usY;
+
+            return true;
+        }
+    }    
+}
+
+bool PacketProcOtherCharacterMoveStop(char* Packet)
+{
+
+    stPacketScMoveStop *PacketScMoveStop = (stPacketScMoveStop*)Packet;
+
+    CList<CBaseObject*>::Iterator iterE = objList.end();
+
+    for (CList<CBaseObject*>::Iterator iter = objList.begin(); iter != iterE; ++iter)
+    {
+        if (iter->m_dwObjectID == PacketScMoveStop->dwID)
+        {
+            iter->m_ActionInput = KeyList::eACTION_STAND;        
+            iter->m_iXpos = PacketScMoveStop->usX;
+            iter->m_iYpos = PacketScMoveStop->usY;
+
+            return true;
+        }
+    }
+}
+
+bool PacketProcScAttack1(char* Packet)
+{
+    stPacketScAttack1 *PacketAttack1 = (stPacketScAttack1*)Packet;
+
+    CList<CBaseObject*>::Iterator iterE = objList.end();
+
+    for (CList<CBaseObject*>::Iterator iter = objList.begin(); iter != iterE; ++iter)
+    {
+        if (iter->m_dwObjectID == PacketAttack1->dwID)
+        {
+            iter->m_ActionInput = KeyList::eACTION_ATTACK1;
+
+            iter->m_iXpos = PacketAttack1->usX;
+            iter->m_iYpos = PacketAttack1->usY;
+            return true;
+        }
+    }
+}
+
+bool PacketProcScAttack2(char* Packet)
+{
+    stPacketScAttack2 *PacketAttack2 = (stPacketScAttack2*)Packet;
+
+    CList<CBaseObject*>::Iterator iterE = objList.end();
+
+    for (CList<CBaseObject*>::Iterator iter = objList.begin(); iter != iterE; ++iter)
+    {
+        if (iter->m_dwObjectID == PacketAttack2->dwID)
+        {
+            iter->m_ActionInput = KeyList::eACTION_ATTACK2;
+            iter->m_iXpos = PacketAttack2->usX;
+            iter->m_iYpos = PacketAttack2->usY;
+            return true;
+        }
+    }
+}
+
+bool PacketProcScAttack3(char* Packet)
+{
+    stPacketScAttack3 *PacketAttack3 = (stPacketScAttack3*)Packet;
+
+    CList<CBaseObject*>::Iterator iterE = objList.end();
+
+    for (CList<CBaseObject*>::Iterator iter = objList.begin(); iter != iterE; ++iter)
+    {
+        if (iter->m_dwObjectID == PacketAttack3->dwID)
+        {
+            iter->m_ActionInput = KeyList::eACTION_ATTACK3;
+            iter->m_iXpos = PacketAttack3->usX;
+            iter->m_iYpos = PacketAttack3->usY;
+            return true;
+        }
+    }
+}
+
+bool PacketProcDamage(char* Packet)
+{
+
+    stPacketScDamage* PacketScDamage = (stPacketScDamage*)Packet;
+
+    DWORD dwAttackerID;
+    DWORD victimID;
+    BYTE byDamageHP;
+
+
+    CList<CBaseObject*>::Iterator iterE = objList.end();
+
+    for (CList<CBaseObject*>::Iterator iter = objList.begin(); iter != iterE; ++iter)
+    {
+        if (iter->m_dwObjectID == PacketScDamage->victimID)
+        {
+            iter->m_chHP = PacketScDamage->byDamageHP;
+            return true;
+        }
+    }
+
+
+    return true;
+}
+
+bool PacketProcScSync(char* Packet)
+{
+    stPacketScSync *PacketSync = (stPacketScSync*)Packet;
+
+    CList<CBaseObject*>::Iterator iterE = objList.end();
+
+    for (CList<CBaseObject*>::Iterator iter = objList.begin(); iter != iterE; ++iter)
+    {
+        if (iter->m_dwObjectID == PacketSync->dwID)
+        {
+            iter->m_iXpos = PacketSync->usX;
+            iter->m_iYpos = PacketSync->usY;
+            return true;
+        }
+    }
+}
+
 void BubbleSort() 
 {
     
-    CList<CBaseObject*>::Iterator iterE = objList.end().node->prev;
+    CList<CBaseObject*>::Iterator iterE = objList.end();
+
+    --iterE;
     
     for (int iCnt = 0; iCnt < objList.listLength; iCnt++)
     {
         for (CList<CBaseObject*>::Iterator iter = objList.begin(); iter != iterE; ++iter)
         {
-
             CList<CBaseObject*>::Iterator iterN = iter.node->next;
 
             if (iter->m_iYpos > iterN->m_iYpos)
@@ -558,3 +985,4 @@ void BubbleSort()
     }
 
 }
+

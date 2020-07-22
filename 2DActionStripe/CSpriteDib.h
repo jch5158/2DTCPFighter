@@ -34,9 +34,9 @@ public:
 
 	void ReleaseStrite(int iSpriteIndex);
 
-	void DrawSprite(int iSpriteIndex, int iDrawX, int iDrawY, BYTE* bytDest, int iDestWidth, int iDestHeight, int iDestPitch, int iDrawLen = 100);
+	void DrawSprite(int iSpriteIndex,  short iDrawX,  short iDrawY, BYTE* bytDest, int iDestWidth, int iDestHeight, int iDestPitch, int iDrawLen = 100);
 
-	void DrawImage(int iSpriteIndex, int iDrawX, int iDrawY, BYTE* bytDest, int iDestWidth, int iDestHeight, int iDestPitch, int iDrawLen = 100);
+	void DrawImage(int iSpriteIndex,  short iDrawX,  short iDrawY, BYTE* bytDest, int iDestWidth, int iDestHeight, int iDestPitch, int iDrawLen = 100);
 
 
 protected:
