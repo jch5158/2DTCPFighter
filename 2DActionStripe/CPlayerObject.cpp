@@ -406,13 +406,11 @@ void CPlayerObject::SetHp(BYTE Hp)
 
 CPlayerObject::CPlayerObject()
 {
-	static DWORD playerID = 0;
+	this->deleteCheck = false;
 
 	this->m_ObjectType = e_ObjType::eType_Player;
 
 	this->m_chHP = 100;
-
-	this->m_dwObjectID = playerID;
 
 	// 키보드 입력 메시지
 	this->m_ActionInput = KeyList::eACTION_STAND;

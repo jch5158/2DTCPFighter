@@ -48,8 +48,6 @@ public:
 
 	// 사용자의 입력값을 처리하는 메시지
 	DWORD m_dwActionCur;
-
-
 	
 	unsigned int m_iXpos;
 
@@ -82,6 +80,8 @@ public:
 
 	// 예전 방향
 	BYTE m_dwDirOld;
+
+	bool deleteCheck;
 
 	// 캐릭터 hp
 	unsigned char m_chHP;

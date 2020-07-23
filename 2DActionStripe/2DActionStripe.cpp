@@ -13,6 +13,7 @@
 #include "CSpriteDib.h"
 #include "CScreenDib.h"
 #include "CBaseObject.h"
+#include "CDamageEffect.h"
 #include "CPlayerObject.h"
 
 #define WM_NETWORK (WM_USER+1)
@@ -46,7 +47,6 @@ LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 
 VOID                MainUpdate(void);
 BOOL                InitialGame(void);
-
 
 // 네트워크 관련 함수입니다.
 //==================================================================
@@ -100,9 +100,10 @@ bool PacketProcScSync(char* Packet);
 
 // ================================================================
 
-
 BOOL UpdateGame(void);
 BOOL Render(void);
+
+void DeleteObject();
 void Update(void);
 void BubbleSort();
 void KeyProcess();
@@ -371,10 +372,10 @@ BOOL InitialGame(void) {
     SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_ATTACK3_R05, "image/Attack3_R_05.bmp", 71, 90);
     SpriteDib.LoadDibSprite(e_SPRITE::ePLAYER_ATTACK3_R06, "image/Attack3_R_06.bmp", 71, 90);
 
-    SpriteDib.LoadDibSprite(e_SPRITE::eEFFECT_SPARK_01, "image/xSpark1.bmp", 71, 90);
-    SpriteDib.LoadDibSprite(e_SPRITE::eEFFECT_SPARK_02, "image/xSpark2.bmp", 71, 90);
-    SpriteDib.LoadDibSprite(e_SPRITE::eEFFECT_SPARK_03, "image/xSpark3.bmp", 71, 90);
-    SpriteDib.LoadDibSprite(e_SPRITE::eEFFECT_SPARK_04, "image/xSpark4.bmp", 71, 90);
+    SpriteDib.LoadDibSprite(e_SPRITE::eEFFECT_SPARK_01, "image/xSpark_1.bmp", 70, 125);
+    SpriteDib.LoadDibSprite(e_SPRITE::eEFFECT_SPARK_02, "image/xSpark_2.bmp", 70, 125);
+    SpriteDib.LoadDibSprite(e_SPRITE::eEFFECT_SPARK_03, "image/xSpark_3.bmp", 70, 125);
+    SpriteDib.LoadDibSprite(e_SPRITE::eEFFECT_SPARK_04, "image/xSpark_4.bmp", 70, 125);
 
     SpriteDib.LoadDibSprite(e_SPRITE::eGUAGE_HP,           "image/HPGuage.bmp", 0, 0);
     SpriteDib.LoadDibSprite(e_SPRITE::eSHADOW,             "image/Shadow.bmp", 32, 4);
@@ -400,8 +401,7 @@ BOOL InitialGame(void) {
 }
 
 BOOL Render(void) 
-{
-    
+{ 
     // 백 버퍼를 받는다.
     BYTE* pDestDib = ScreenDib.GetDibBuffer();
 
@@ -569,6 +569,8 @@ VOID MainUpdate(void)
 
 BOOL UpdateGame(void)
 {
+
+    DeleteObject();
 
     // 키 입력
     if (windowActive)
@@ -1071,8 +1073,7 @@ bool PacketProcDeleteCharacter(char* Packet)
     {
         if (iter->m_dwObjectID == deleteCharacter->dwID)
         {
-            delete (*iter)->data;
-            objList.erase(iter);
+            iter->deleteCheck = true;
             return true;
         }
     } 
@@ -1190,6 +1191,11 @@ bool PacketProcDamage(char* Packet)
         if (iter->m_dwObjectID == PacketScDamage->victimID)
         {
             iter->m_chHP = PacketScDamage->byDamageHP;
+
+            CDamageEffect* effct = new CDamageEffect(iter->m_iXpos, iter->m_iYpos);
+
+            objList.PushBack(effct);
+
             return true;
         }
     }
@@ -1239,4 +1245,24 @@ void BubbleSort()
         --iterE;
     }
 
+}
+
+
+void DeleteObject()
+{
+    CList<CBaseObject*>::Iterator iterE = objList.end();
+
+    for(CList<CBaseObject*>::Iterator iter = objList.begin(); iter != iterE;)
+    {
+        if (iter->deleteCheck)
+        {
+            delete (*iter)->data;
+            iter = objList.erase(iter);
+        }
+        else
+        {
+            ++iter;
+        }
+
+    }
 }

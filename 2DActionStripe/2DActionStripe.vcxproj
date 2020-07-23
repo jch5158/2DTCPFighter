@@ -145,6 +145,7 @@
   <ItemGroup>
     <ClInclude Include="2DActionStripe.h" />
     <ClInclude Include="CBaseObject.h" />
+    <ClInclude Include="CDamageEffect.h" />
     <ClInclude Include="CFrameSkip.h" />
     <ClInclude Include="CList.h" />
     <ClInclude Include="CPlayerObject.h" />
@@ -160,6 +161,7 @@
   <ItemGroup>
     <ClCompile Include="2DActionStripe.cpp" />
     <ClCompile Include="CBaseObject.cpp" />
+    <ClCompile Include="CDamageEffect.cpp" />
     <ClCompile Include="CFrameSkip.cpp" />
     <ClCompile Include="CList.cpp" />
     <ClCompile Include="CPlayerObject.cpp" />
