@@ -46,6 +46,11 @@ public:
 	// 사용자 입력값 저장하는 멤버변수.
 	DWORD m_ActionInput;
 
+	// 사용자의 입력값을 처리하는 메시지
+	DWORD m_dwActionCur;
+
+
+	
 	unsigned int m_iXpos;
 
 	unsigned int m_iYpos;
@@ -73,10 +78,10 @@ public:
 	DWORD m_ObjectType;
 
 	// 방향 오른쪽 디폴트
-	DWORD m_dwDirCur;
+	BYTE m_dwDirCur;
 
 	// 예전 방향
-	DWORD m_dwDirOld;
+	BYTE m_dwDirOld;
 
 	// 캐릭터 hp
 	unsigned char m_chHP;

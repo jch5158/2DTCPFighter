@@ -33,7 +33,6 @@ void CBaseObject::SetSprite(DWORD dwSpriteStart, DWORD dwSpriteEnd, DWORD dwFram
 
 int CBaseObject::NextFrame()
 {	
-	this->m_dwDelayCount += 1;
 
 	// 딜레이 조건에 맞으면 다음 스프라이트 동작으로 변경한다.
 	if (this->m_dwDelayCount >= m_dwFrameDelay)
@@ -49,6 +48,9 @@ int CBaseObject::NextFrame()
 			this->m_bEndFrame = true;
 		}
 	}
+
+
+	this->m_dwDelayCount += 1;
 
 	return -1;
 }

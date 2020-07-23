@@ -18,9 +18,7 @@ public:
 
 	~CPlayerObject();
 
-	
-	// 지금 입력받은 메시지
-	DWORD m_dwActionCur;
+	bool actionCheck;
 
 };
 

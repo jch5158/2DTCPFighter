@@ -6,6 +6,9 @@
 #ifndef __PACKET_DEFINE__
 #define __PACKET_DEFINE__
 
+
+#define dfNETWORK_PACKET_CODE 0x89
+
 #pragma pack(1)
 struct stHeader
 {

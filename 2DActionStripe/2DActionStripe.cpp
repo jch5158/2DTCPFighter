@@ -60,6 +60,21 @@ BOOL ReadEvent();
 // send를 처리하는 함수입니다. 
 BOOL SendEvent();
 
+BOOL SendPacket(stHeader* pHeader, char* pPacket);
+
+void SendProc();
+
+void PackingMoveStart(stHeader* pHeader, stPacketCsMoveStart *packetCsMoveStart,BYTE dirCur, unsigned short usX, unsigned short usY);
+
+void PackingMoveStop(stHeader* pHeader, stPacketCsMoveStop* packetCsMoveStop, BYTE dirCur, unsigned short usX, unsigned short usY);
+
+void PackingAttack1(stHeader* pHeader, stPacketCsAttack1* packetCsAttack1, BYTE dirCur, unsigned short usX, unsigned short usY);
+
+void PackingAttack2(stHeader* pHeader, stPacketCsAttack2* packetCsAttack2, BYTE dirCur, unsigned short usX, unsigned short usY);
+
+void PackingAttack3(stHeader* pHeader, stPacketCsAttack3* packetCsAttack3, BYTE dirCur, unsigned short usX, unsigned short usY);
+
+
 // recv 데이터를 분기하여 처리하는 함수입니다. 
 void PacketProc(BYTE byPacketType, char* Packet);
 
@@ -426,6 +441,10 @@ void Update(void) {
         iter->Update();
     }
 
+    if (playerObj->actionCheck)
+    {
+        SendProc();
+    }
 
     // 로직 프레임 텍스트 출력
     frameSkip.UpdateCheck(g_hWnd);
@@ -572,6 +591,245 @@ BOOL UpdateGame(void)
      return true;
 }
 
+
+// send 파트 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+void SendProc()
+{
+    stHeader header;
+
+    stPacketCsMoveStart moveStart;
+    stPacketCsMoveStop moveStop;
+
+    stPacketCsAttack1 attack1;
+    stPacketCsAttack2 attack2;
+    stPacketCsAttack3 attack3;
+
+    switch (playerObj->m_dwActionCur)
+    {
+    case eACTION_MOVE_LL:
+
+        PackingMoveStart(&header, &moveStart,playerObj->m_dwDirCur,playerObj->m_iXpos,playerObj->m_iYpos);
+        SendPacket(&header, (char*)&moveStart);
+
+        break;
+    case eACTION_MOVE_LU:
+
+        PackingMoveStart(&header, &moveStart, playerObj->m_dwDirCur, playerObj->m_iXpos, playerObj->m_iYpos);
+        SendPacket(&header, (char*)&moveStart);
+
+        break;
+    case eACTION_MOVE_UU:
+        PackingMoveStart(&header, &moveStart, playerObj->m_dwDirCur, playerObj->m_iXpos, playerObj->m_iYpos);
+        SendPacket(&header, (char*)&moveStart);
+
+        break;
+    case eACTION_MOVE_RU:
+
+        PackingMoveStart(&header, &moveStart, playerObj->m_dwDirCur, playerObj->m_iXpos, playerObj->m_iYpos);
+        SendPacket(&header, (char*)&moveStart);
+
+        break;
+    case eACTION_MOVE_RR:
+
+        PackingMoveStart(&header, &moveStart, playerObj->m_dwDirCur, playerObj->m_iXpos, playerObj->m_iYpos);
+        SendPacket(&header, (char*)&moveStart);
+
+        break;
+    case eACTION_MOVE_RD:
+
+        PackingMoveStart(&header, &moveStart, playerObj->m_dwDirCur, playerObj->m_iXpos, playerObj->m_iYpos);
+        SendPacket(&header, (char*)&moveStart);
+
+        break;
+    case eACTION_MOVE_DD:
+
+        PackingMoveStart(&header, &moveStart, playerObj->m_dwDirCur, playerObj->m_iXpos, playerObj->m_iYpos);
+        SendPacket(&header, (char*)&moveStart);
+
+        break;
+    case eACTION_MOVE_LD:
+
+        PackingMoveStart(&header, &moveStart, playerObj->m_dwDirCur, playerObj->m_iXpos, playerObj->m_iYpos);
+        SendPacket(&header, (char*)&moveStart);
+
+        break;
+    case eACTION_ATTACK1:
+
+        PackingAttack1(&header, &attack1, playerObj->m_dwDirCur, playerObj->m_iXpos, playerObj->m_iYpos);
+        SendPacket(&header, (char*)&attack1);
+
+        break;
+    case eACTION_ATTACK2:
+
+        PackingAttack2(&header, &attack2, playerObj->m_dwDirCur, playerObj->m_iXpos, playerObj->m_iYpos);
+        SendPacket(&header, (char*)&attack2);
+
+        break;
+    case eACTION_ATTACK3:
+
+        PackingAttack3(&header, &attack3, playerObj->m_dwDirCur, playerObj->m_iXpos, playerObj->m_iYpos);
+        SendPacket(&header, (char*)&attack3);
+
+        break;
+
+    case eACTION_STAND:
+
+        PackingMoveStop(&header, &moveStop, playerObj->m_dwDirCur, playerObj->m_iXpos, playerObj->m_iYpos);
+        SendPacket(&header, (char*)&moveStop);
+
+        break;
+    default:
+        break;
+    }
+
+    return;
+}
+
+BOOL SendPacket(stHeader* pHeader, char* pPacket)
+{
+    int retval;
+
+    retval = session.g_SendQ.Enqueue((char*)pHeader, sizeof(stHeader));
+    if (retval != sizeof(stHeader))
+    {
+        printf_s("send enqueue error");
+        closesocket(session.g_Socket);
+        return false;
+    }
+
+    retval = session.g_SendQ.Enqueue((char*)pPacket, pHeader->bySize);
+    if (retval != pHeader->bySize)
+    {
+        printf_s("send enqueue error");
+        closesocket(session.g_Socket);
+        return false;
+    }
+
+    return SendEvent();
+}
+
+BOOL SendEvent()
+{
+    int retval;
+
+    char buffer[9900];
+
+    while (1)
+    {
+        retval = session.g_SendQ.GetUseSize();
+        if (retval == 0)
+        {
+            return true;
+        }
+        
+        if (session.g_SendQ.Peek(buffer, sizeof(stHeader)) < 3)
+        {
+            printf_s("peek error\n");
+            closesocket(session.g_Socket);
+            return false;
+        }
+
+        session.g_SendQ.MoveFront(sizeof(stHeader));
+        
+        retval = session.g_SendQ.Dequeue(&buffer[3], buffer[1]);
+        if (retval != buffer[1])
+        {
+            printf_s("send Dequeue error\n");
+            closesocket(session.g_Socket);
+            return false;
+        }
+
+        retval = send(session.g_Socket, buffer, buffer[1] + sizeof(stHeader), 0);
+        if (retval == SOCKET_ERROR)
+        {
+            printf_s("send socket error\n");
+            closesocket(session.g_Socket);
+            return false;
+        }
+
+    }
+
+    return true;
+}
+
+
+void PackingMoveStart(stHeader* pHeader, stPacketCsMoveStart* packetCsMoveStart, BYTE dirCur, unsigned short usX, unsigned short usY)
+{
+    pHeader->byCode = dfNETWORK_PACKET_CODE;
+    pHeader->bySize = sizeof(stPacketCsMoveStart);
+    pHeader->byType = dfPACKET_CS_MOVE_START;
+
+    packetCsMoveStart->byDirection = playerObj->m_dwActionCur;
+    packetCsMoveStart->usX = usX;
+    packetCsMoveStart->usY = usY;
+
+    return;
+}
+
+void PackingMoveStop(stHeader* pHeader, stPacketCsMoveStop* packetCsMoveStop, BYTE dirCur, unsigned short usX, unsigned short usY)
+{
+    pHeader->byCode = dfNETWORK_PACKET_CODE;
+    pHeader->bySize = sizeof(stPacketCsMoveStop);
+    pHeader->byType = dfPACKET_CS_MOVE_STOP;
+
+    packetCsMoveStop->byDirection = dirCur;
+    packetCsMoveStop->usX = usX;
+    packetCsMoveStop->usY = usY;
+
+    return;
+}
+
+void PackingAttack1(stHeader* pHeader, stPacketCsAttack1* packetCsAttack1, BYTE dirCur, unsigned short usX, unsigned short usY)
+{
+    pHeader->byCode = dfNETWORK_PACKET_CODE;
+    pHeader->bySize = sizeof(packetCsAttack1);
+    pHeader->byType = dfPACKET_CS_ATTACK1;
+
+    packetCsAttack1->byDirection = playerObj->m_dwDirCur;
+    packetCsAttack1->usX = usX;
+    packetCsAttack1->usY = usY;
+
+    return;
+}
+
+void PackingAttack2(stHeader* pHeader, stPacketCsAttack2* packetCsAttack2, BYTE dirCur, unsigned short usX, unsigned short usY)
+{
+    pHeader->byCode = dfNETWORK_PACKET_CODE;
+    pHeader->bySize = sizeof(packetCsAttack2);
+    pHeader->byType = dfPACKET_CS_ATTACK2;
+
+
+    packetCsAttack2->byDirection = playerObj->m_dwDirCur;
+    packetCsAttack2->usX = usX;
+    packetCsAttack2->usY = usY;
+
+    return;
+}
+
+void PackingAttack3(stHeader* pHeader, stPacketCsAttack3* packetCsAttack3, BYTE dirCur, unsigned short usX, unsigned short usY)
+{
+    pHeader->byCode = dfNETWORK_PACKET_CODE;
+    pHeader->bySize = sizeof(packetCsAttack3);
+    pHeader->byType = dfPACKET_CS_ATTACK3;
+
+
+    packetCsAttack3->byDirection = playerObj->m_dwDirCur;
+    packetCsAttack3->usX = usX;
+    packetCsAttack3->usY = usY;
+    
+    return;
+}
+
+
+
+// send 파트 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+
+
+// 네트워크 파트 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
 BOOL NetworkProc(WPARAM wParam, LPARAM lParam)
 {
     if (WSAGETSELECTERROR(lParam))
@@ -608,6 +866,12 @@ BOOL NetworkProc(WPARAM wParam, LPARAM lParam)
     return true;
 }
 
+// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+
+
+
+// recv 파트 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 BOOL ReadEvent()
 {
     int retval;
@@ -649,7 +913,7 @@ BOOL ReadEvent()
             return true;
         }
 
-        bufferRetval = session.g_RecvQ.Peek(msgBuffer,3);
+        bufferRetval = session.g_RecvQ.Peek(msgBuffer, 3);
         if (bufferRetval != 3)
         {
             printf_s("peek error\n");
@@ -683,19 +947,9 @@ BOOL ReadEvent()
         }
 
         PacketProc(msgBuffer[2], &msgBuffer[3]);
-
     }
-
     return true;
 }
-
-BOOL SendEvent()
-{
-    char buffer[9900];
-
-    return true;
-}
-
 
 void PacketProc(BYTE byPacketType, char* Packet)
 {
@@ -835,8 +1089,7 @@ bool PacketProcOtherCharacterMoveStart(char* Packet)
         if (iter->m_dwObjectID == PacketScMoveStart->dwID)
         {
             iter->m_ActionInput = PacketScMoveStart->byDirection;
-            printf_s("%d, %d\n", KeyList::eACTION_MOVE_LU, PacketScMoveStart->byDirection);
-
+            
             iter->m_iXpos = PacketScMoveStart->usX;
             iter->m_iYpos = PacketScMoveStart->usY;
 
@@ -962,13 +1215,15 @@ bool PacketProcScSync(char* Packet)
     }
 }
 
-void BubbleSort() 
+// recv 파트 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+void BubbleSort()
 {
-    
+
     CList<CBaseObject*>::Iterator iterE = objList.end();
 
     --iterE;
-    
+
     for (int iCnt = 0; iCnt < objList.listLength; iCnt++)
     {
         for (CList<CBaseObject*>::Iterator iter = objList.begin(); iter != iterE; ++iter)
@@ -985,4 +1240,3 @@ void BubbleSort()
     }
 
 }
-

@@ -18,7 +18,9 @@ void CPlayerObject::Update()
 
 void CPlayerObject::ActionProc()
 {	
-	
+
+	this->actionCheck = false;
+
 	switch (this->m_dwActionCur)
 	{
 	case KeyList::eACTION_ATTACK1:
@@ -43,6 +45,7 @@ void CPlayerObject::ActionProc()
 			// 멈추고 다음 동작
 			this->m_ActionInput = KeyList::eACTION_STAND;
 			this->m_dwActionCur = KeyList::eACTION_STAND;
+			this->actionCheck = true;
 			
 		}	
 	
@@ -59,12 +62,16 @@ void CPlayerObject::ActionProc()
 
 void CPlayerObject::InputActionProc()
 {
-
 	// 현재 액션을 과거 액션에 넣어준다.
 	DWORD dwActionOld = this->m_dwActionCur;
 	
 	// BaseObject의 ActionInput() 함수로 입력받은 값을 넣어준다.
 	this->m_dwActionCur = this->m_ActionInput;
+
+	if (dwActionOld != this->m_dwActionCur)
+	{
+		this->actionCheck = true;
+	}
 
 	switch (this->m_dwActionCur)
 	{
@@ -364,8 +371,6 @@ void CPlayerObject::InputActionProc()
 
 		break;
 	}
-
-	
 }
 
 void CPlayerObject::Render()
@@ -409,11 +414,11 @@ CPlayerObject::CPlayerObject()
 
 	this->m_dwObjectID = playerID;
 
+	// 키보드 입력 메시지
 	this->m_ActionInput = KeyList::eACTION_STAND;
 
 	// 지금 입력받은 메시지
 	this->m_dwActionCur = KeyList::eACTION_STAND;
-
 	
 	// 방향 오른쪽 디폴트
 	this->m_dwDirCur = e_PlayerDir::eRight;
