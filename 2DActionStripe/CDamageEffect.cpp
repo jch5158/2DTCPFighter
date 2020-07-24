@@ -21,13 +21,13 @@ CDamageEffect::CDamageEffect(unsigned short usX, unsigned short usY,DWORD action
 	{
 	case KeyList::eACTION_ATTACK1:
 
-		this->m_EffectTiming = 100;
+		this->m_EffectTiming = 50;
 
 		break;
 
 	case KeyList::eACTION_ATTACK2:
 		
-		this->m_EffectTiming = 150;
+		this->m_EffectTiming = 100;
 
 		break;
 

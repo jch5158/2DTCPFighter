@@ -1088,7 +1088,25 @@ bool PacketProcOtherCharacterMoveStart(char* Packet)
         if (iter->m_dwObjectID == PacketScMoveStart->dwID)
         {
             iter->m_ActionInput = PacketScMoveStart->byDirection;
-            iter->m_dwActionCur = PacketScMoveStart->byDirection;
+//            iter->m_dwActionCur = PacketScMoveStart->byDirection;
+
+            switch (iter->m_dwActionCur)
+            {
+            case KeyList::eACTION_ATTACK1:
+                iter->m_dwActionCur = PacketScMoveStart->byDirection;
+
+                break;
+            case KeyList::eACTION_ATTACK2:
+                iter->m_dwActionCur = PacketScMoveStart->byDirection;
+
+                break;
+            case KeyList::eACTION_ATTACK3:
+                iter->m_dwActionCur = PacketScMoveStart->byDirection;
+
+                break;
+            }
+
+
             iter->m_iXpos = PacketScMoveStart->usX;
             iter->m_iYpos = PacketScMoveStart->usY;
 
