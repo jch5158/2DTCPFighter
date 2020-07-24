@@ -232,7 +232,7 @@ int CRingBuffer::Peek(char* chpDest, int iSize)
 void CRingBuffer::MoveRear(int iSize)
 {
 	int queueLen = this->mQueueLen;
-
+	/*
 	int useSize = GetUseSize();
 
 	if (iSize > useSize)
@@ -253,6 +253,16 @@ void CRingBuffer::MoveRear(int iSize)
 	else
 	{
 		this->rear = this->rear - iSize;
+	}*/
+
+
+
+	this->rear = (this->rear + iSize) % queueLen;
+
+
+	if (this->rear == queueLen - 1)
+	{
+		this->rear = 0;
 	}
 
 	return;
@@ -300,8 +310,9 @@ void CRingBuffer::MoveFront(int iSize)
 /////////////////////////////////////////////////////////////////////////
 void CRingBuffer::ClearBuffer(void)
 {
-	this->front = 0;
-	this->rear = 0;
+		this->front = 0;
+		this->rear = 0;
+	
 }
 
 
@@ -325,5 +336,5 @@ char* CRingBuffer::GetFrontBufferPtr(void)
 /////////////////////////////////////////////////////////////////////////
 char* CRingBuffer::GetRearBufferPtr(void)
 {
-	return &this->mRingBuffer[this->rear];
+	return &this->mRingBuffer[this->rear + 1];
 }

@@ -21,23 +21,39 @@ CDamageEffect::CDamageEffect(unsigned short usX, unsigned short usY,DWORD action
 	{
 	case KeyList::eACTION_ATTACK1:
 
+
+	{
+		printf_s("attack1\n");
+	}
+
 		this->m_EffectTiming = 50;
 
 		break;
 
 	case KeyList::eACTION_ATTACK2:
-		
+	
+	{
+		printf_s("attack2\n");
+	}
+
 		this->m_EffectTiming = 100;
 
 		break;
 
 	case KeyList::eACTION_ATTACK3:
 	
+	{
+		printf_s("attack3\n");
+	}
+
 		this->m_EffectTiming = 300;
 
 		break;
 
 	default:
+	{
+		printf_s("default\n");
+	}
 
 		this->m_EffectTiming = 300;
 

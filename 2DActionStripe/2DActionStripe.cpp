@@ -903,6 +903,25 @@ BOOL ReadEvent()
         return false;
     }
 
+ /*   int directEnqueueSize = session.g_RecvQ.DirectEnqueueSize();
+
+    char* rearPtr = session.g_RecvQ.GetRearBufferPtr();
+
+    retval = recv(session.g_Socket, rearPtr, directEnqueueSize, 0);
+    if (retval == SOCKET_ERROR)
+    {
+        if (WSAGetLastError() != WSAEWOULDBLOCK)
+        {
+            printf_s("recv error : %d\n", WSAGetLastError());
+            session.g_ConnectCheck = false;
+            closesocket(session.g_Socket);
+            return false;
+        }
+        return true;
+    }*/
+
+   // session.g_RecvQ.MoveRear(retval);
+
     char msgBuffer[100];
 
     while (1)
@@ -1088,7 +1107,6 @@ bool PacketProcOtherCharacterMoveStart(char* Packet)
         if (iter->m_dwObjectID == PacketScMoveStart->dwID)
         {
             iter->m_ActionInput = PacketScMoveStart->byDirection;
-//            iter->m_dwActionCur = PacketScMoveStart->byDirection;
 
             switch (iter->m_dwActionCur)
             {
@@ -1214,7 +1232,7 @@ bool PacketProcDamage(char* Packet)
                 if (iterIn->m_dwObjectID == PacketScDamage->dwAttackerID)
                 {
                     
-                    effct = new CDamageEffect(iter->m_iXpos, iter->m_iYpos,iterIn->m_dwActionCur);
+                    effct = new CDamageEffect(iter->m_iXpos, iter->m_iYpos,iterIn->m_ActionInput);
 
                     objList.PushBack(effct);
 

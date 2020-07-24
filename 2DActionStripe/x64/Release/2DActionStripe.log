@@ -1,4 +1,8 @@
-﻿  CDamageEffect.cpp
+﻿  2DActionStripe.cpp
+C:\Users\jch35\source\repos\2DActionStripe\2DActionStripe\2DActionStripe.cpp(764,47): warning C4244: '=': 'DWORD'에서 'BYTE'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\jch35\source\repos\2DActionStripe\2DActionStripe\2DActionStripe.cpp(1217,11): warning C4101: 'victimID' :참조되지 않은 지역 변수입니다.
+C:\Users\jch35\source\repos\2DActionStripe\2DActionStripe\2DActionStripe.cpp(1216,11): warning C4101: 'dwAttackerID' :참조되지 않은 지역 변수입니다.
+C:\Users\jch35\source\repos\2DActionStripe\2DActionStripe\2DActionStripe.cpp(1218,10): warning C4101: 'byDamageHP' :참조되지 않은 지역 변수입니다.
   코드를 생성하고 있습니다.
   1 of 113 functions ( 0.9%) were compiled, the rest were copied from previous compilation.
     0 functions were new in current compilation
