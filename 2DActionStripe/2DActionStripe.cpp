@@ -569,9 +569,6 @@ VOID MainUpdate(void)
 
 BOOL UpdateGame(void)
 {
-
-    DeleteObject();
-
     // 키 입력
     if (windowActive)
     {
@@ -581,6 +578,7 @@ BOOL UpdateGame(void)
     // 업데이트
     Update();
 
+    DeleteObject();
 
     // 렌더
     if (frameSkip.FrameSkip())
@@ -1090,7 +1088,7 @@ bool PacketProcOtherCharacterMoveStart(char* Packet)
         if (iter->m_dwObjectID == PacketScMoveStart->dwID)
         {
             iter->m_ActionInput = PacketScMoveStart->byDirection;
-            
+            iter->m_dwActionCur = PacketScMoveStart->byDirection;
             iter->m_iXpos = PacketScMoveStart->usX;
             iter->m_iYpos = PacketScMoveStart->usY;
 
@@ -1183,6 +1181,7 @@ bool PacketProcDamage(char* Packet)
     DWORD victimID;
     BYTE byDamageHP;
 
+    CDamageEffect* effct;
 
     CList<CBaseObject*>::Iterator iterE = objList.end();
 
@@ -1191,15 +1190,23 @@ bool PacketProcDamage(char* Packet)
         if (iter->m_dwObjectID == PacketScDamage->victimID)
         {
             iter->m_chHP = PacketScDamage->byDamageHP;
+            
+            for (CList<CBaseObject*>::Iterator iterIn = objList.begin(); iterIn != iterE; ++iterIn)
+            {
+                if (iterIn->m_dwObjectID == PacketScDamage->dwAttackerID)
+                {
+                    
+                    effct = new CDamageEffect(iter->m_iXpos, iter->m_iYpos,iterIn->m_dwActionCur);
 
-            CDamageEffect* effct = new CDamageEffect(iter->m_iXpos, iter->m_iYpos);
+                    objList.PushBack(effct);
 
-            objList.PushBack(effct);
-
-            return true;
+                    return true;
+                }
+            }
         }
     }
 
+    
 
     return true;
 }

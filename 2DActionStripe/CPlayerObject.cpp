@@ -18,7 +18,6 @@ void CPlayerObject::Update()
 
 void CPlayerObject::ActionProc()
 {	
-
 	this->actionCheck = false;
 
 	switch (this->m_dwActionCur)
@@ -45,8 +44,7 @@ void CPlayerObject::ActionProc()
 			// 멈추고 다음 동작
 			this->m_ActionInput = KeyList::eACTION_STAND;
 			this->m_dwActionCur = KeyList::eACTION_STAND;
-			this->actionCheck = true;
-			
+			this->actionCheck = true;	
 		}	
 	
 		break;
