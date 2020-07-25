@@ -28,6 +28,7 @@ int CRingBuffer::GetUseSize(void)
 	{
 		return (this->mQueueLen - this->front) + this->rear;
 	}
+
 }
 
 // 현재 버퍼에 남은 용량 얻기, Return : 남은 용량
@@ -61,7 +62,10 @@ int CRingBuffer::DirectEnqueueSize(void)
 	{
 		return this->mQueueLen - 1;
 	}
-
+	else if (this->rear == this->mQueueLen - 1)
+	{
+		return this->front;
+	}
 	else if (this->rear >= this->front)
 	{
 		return this->mQueueLen - this->rear - 1;
@@ -70,6 +74,12 @@ int CRingBuffer::DirectEnqueueSize(void)
 	{
 		return this->front - this->rear - 1;
 	}
+
+
+	//int queueLen = this->mQueueLen;
+
+
+	//return queueLen - this->rear - 1;
 
 }
 
@@ -231,39 +241,8 @@ int CRingBuffer::Peek(char* chpDest, int iSize)
 /////////////////////////////////////////////////////////////////////////
 void CRingBuffer::MoveRear(int iSize)
 {
-	int queueLen = this->mQueueLen;
-	/*
-	int useSize = GetUseSize();
-
-	if (iSize > useSize)
-	{
-		iSize = useSize;
-	}
-
-	int sizeCheck = this->rear - iSize;
-
-	if (sizeCheck < 0)
-	{
-		int addSize = iSize - this->rear;
-
-		this->rear = 0;
-
-		this->rear = queueLen - addSize;
-	}
-	else
-	{
-		this->rear = this->rear - iSize;
-	}*/
-
-
-
-	this->rear = (this->rear + iSize) % queueLen;
-
-
-	if (this->rear == queueLen - 1)
-	{
-		this->rear = 0;
-	}
+	
+	this->rear = (this->rear + iSize) % this->mQueueLen;
 
 	return;
 }
@@ -273,7 +252,7 @@ void CRingBuffer::MoveRear(int iSize)
 void CRingBuffer::MoveFront(int iSize)
 {
 	int queueLen = this->mQueueLen;
-
+	/*
 	int useSize = GetUseSize();
 
 	if (iSize > useSize)
@@ -296,7 +275,11 @@ void CRingBuffer::MoveFront(int iSize)
 	else
 	{
 		this->front = this->front + iSize;
-	}
+	}*/
+
+	this->front = (this->front + iSize) % this->mQueueLen;
+
+
 	return;
 }
 
@@ -336,5 +319,5 @@ char* CRingBuffer::GetFrontBufferPtr(void)
 /////////////////////////////////////////////////////////////////////////
 char* CRingBuffer::GetRearBufferPtr(void)
 {
-	return &this->mRingBuffer[this->rear + 1];
+	return &this->mRingBuffer[(this->rear + 1) % this->mQueueLen];
 }

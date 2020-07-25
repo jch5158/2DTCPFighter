@@ -235,6 +235,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                MainUpdate();
             }
         }
+
+        DeleteObject();
     }
 
     timeEndPeriod(1);
@@ -525,6 +527,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         if (!NetworkProc(wParam, lParam))
         {
             MessageBox(hWnd, L"접속이 종료되었습니다.", L"끊겼지롱", MB_OK); 
+            PostQuitMessage(0);
         }
 
         break;
@@ -578,7 +581,7 @@ BOOL UpdateGame(void)
     // 업데이트
     Update();
 
-    DeleteObject();
+    //DeleteObject();
 
     // 렌더
     if (frameSkip.FrameSkip())
@@ -714,7 +717,7 @@ BOOL SendEvent()
 {
     int retval;
 
-    char buffer[9900];
+    char buffer[170];
 
     while (1)
     {
@@ -729,6 +732,11 @@ BOOL SendEvent()
             printf_s("peek error\n");
             closesocket(session.g_Socket);
             return false;
+        }
+
+        if (buffer[1] + 3 > retval)
+        {
+            return true;
         }
 
         session.g_SendQ.MoveFront(sizeof(stHeader));
@@ -850,15 +858,21 @@ BOOL NetworkProc(WPARAM wParam, LPARAM lParam)
         closesocket(wParam);
         session.g_ConnectCheck = false;
 
-        return true;
+        return false;
     case FD_READ:
         
-        ReadEvent();
+        if (!ReadEvent())
+        {
+            return false;
+        }
 
         return true;
     case FD_WRITE:
 
-        SendEvent();
+        if (!SendEvent()) 
+        {
+            return false;
+        } 
     
         return true;
     }
@@ -878,32 +892,32 @@ BOOL ReadEvent()
 
     int bufferRetval;
 
-    char buffer[9900];
+    //char buffer[170];
 
-    retval = recv(session.g_Socket, buffer, sizeof(buffer), 0);
-    if (retval == SOCKET_ERROR)
-    {
-        if (WSAGetLastError() != WSAEWOULDBLOCK)
-        {
-            printf_s("recv error : %d\n", WSAGetLastError());
-            session.g_ConnectCheck = false;
-            closesocket(session.g_Socket);
-            return false;
-        }
-        return true;
-    }
+    //retval = recv(session.g_Socket, buffer, sizeof(buffer), 0);
+    //if (retval == SOCKET_ERROR)
+    //{
+    //    if (WSAGetLastError() != WSAEWOULDBLOCK)
+    //    {
+    //        printf_s("recv error : %d\n", WSAGetLastError());
+    //        session.g_ConnectCheck = false;
+    //        closesocket(session.g_Socket);
+    //        return false;
+    //    }
+    //    return true;
+    //}
 
 
-    bufferRetval = session.g_RecvQ.Enqueue(buffer, retval);
-    if (bufferRetval != retval)
-    {
-        printf_s("recv enqueue size error \n");
-        session.g_ConnectCheck = false;
-        closesocket(session.g_Socket);
-        return false;
-    }
+    //bufferRetval = session.g_RecvQ.Enqueue(buffer, retval);
+    //if (bufferRetval != retval)
+    //{
+    //    printf_s("recv enqueue size error \n");
+    //    session.g_ConnectCheck = false;
+    //    closesocket(session.g_Socket);
+    //    return false;
+    //}
 
- /*   int directEnqueueSize = session.g_RecvQ.DirectEnqueueSize();
+    int directEnqueueSize = session.g_RecvQ.DirectEnqueueSize();
 
     char* rearPtr = session.g_RecvQ.GetRearBufferPtr();
 
@@ -918,9 +932,9 @@ BOOL ReadEvent()
             return false;
         }
         return true;
-    }*/
+    }
 
-   // session.g_RecvQ.MoveRear(retval);
+    session.g_RecvQ.MoveRear(retval);
 
     char msgBuffer[100];
 
@@ -949,7 +963,9 @@ BOOL ReadEvent()
             return false;
         }
 
-        if (msgBuffer[1] > session.g_RecvQ.GetUseSize())
+
+        char check = session.g_RecvQ.GetUseSize();
+        if (msgBuffer[1] + 3 > check)
         {
             return true;
         }
@@ -1012,7 +1028,7 @@ void PacketProc(BYTE byPacketType, char* Packet)
     case dfPACKET_SC_ATTACK3:
 
         PacketProcScAttack3(Packet);
-
+        
         break;
     case dfPACKET_SC_DAMAGE:
 
@@ -1163,8 +1179,11 @@ bool PacketProcScAttack1(char* Packet)
     {
         if (iter->m_dwObjectID == PacketAttack1->dwID)
         {
-            iter->m_ActionInput = KeyList::eACTION_ATTACK1;
+            // 현재 실행중인 메시지를 공격이 아닌 스탠드로 하여 공격 모션에 의해서 
+            // 서버의 공격메시지가 씹히지 않도록 하였습니다.
+            iter->m_dwActionCur = KeyList::eACTION_STAND;
 
+            iter->m_ActionInput = KeyList::eACTION_ATTACK1;
             iter->m_iXpos = PacketAttack1->usX;
             iter->m_iYpos = PacketAttack1->usY;
             return true;
@@ -1182,6 +1201,11 @@ bool PacketProcScAttack2(char* Packet)
     {
         if (iter->m_dwObjectID == PacketAttack2->dwID)
         {
+
+            // 현재 실행중인 메시지를 공격이 아닌 스탠드로 하여 공격 모션에 의해서 
+            // 서버의 공격메시지가 씹히지 않도록 하였습니다.
+            iter->m_dwActionCur = KeyList::eACTION_STAND;
+
             iter->m_ActionInput = KeyList::eACTION_ATTACK2;
             iter->m_iXpos = PacketAttack2->usX;
             iter->m_iYpos = PacketAttack2->usY;
@@ -1200,6 +1224,10 @@ bool PacketProcScAttack3(char* Packet)
     {
         if (iter->m_dwObjectID == PacketAttack3->dwID)
         {
+            // 현재 실행중인 메시지를 공격이 아닌 스탠드로 하여 공격 모션에 의해서 
+            // 서버의 공격메시지가 씹히지 않도록 하였습니다.
+            iter->m_dwActionCur = KeyList::eACTION_STAND;
+
             iter->m_ActionInput = KeyList::eACTION_ATTACK3;
             iter->m_iXpos = PacketAttack3->usX;
             iter->m_iYpos = PacketAttack3->usY;
