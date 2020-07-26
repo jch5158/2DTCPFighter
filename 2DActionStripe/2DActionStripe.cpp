@@ -717,7 +717,7 @@ BOOL SendEvent()
 {
     int retval;
 
-    char buffer[170];
+    char buffer[1000];
 
     while (1)
     {
