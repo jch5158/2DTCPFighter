@@ -75,7 +75,7 @@ void CPlayerObject::InputActionProc()
 	{
 	case KeyList::eACTION_MOVE_UU:
 
-		if (this->m_iYpos > 50) {
+		if (this->m_iYpos > 57) {
 			this->m_iYpos -= 2;
 		}
 
@@ -113,7 +113,7 @@ void CPlayerObject::InputActionProc()
 
 	case KeyList::eACTION_MOVE_DD:
 
-		if (this->m_iYpos < 470)
+		if (this->m_iYpos < 477)
 		{
 			this->m_iYpos += 2;
 		}
@@ -153,7 +153,7 @@ void CPlayerObject::InputActionProc()
 
 	case KeyList::eACTION_MOVE_RR:
 
-		if (this->m_iXpos < 630)
+		if (this->m_iXpos < 627)
 		{
 			this->m_iXpos += 3;
 		}
@@ -177,7 +177,7 @@ void CPlayerObject::InputActionProc()
 
 	case KeyList::eACTION_MOVE_LL:
 
-		if (this->m_iXpos > 10)
+		if (this->m_iXpos > 27)
 		{
 			this->m_iXpos -= 3;
 		}
@@ -201,7 +201,7 @@ void CPlayerObject::InputActionProc()
 
 	case KeyList::eACTION_MOVE_LU:
 
-		if (this->m_iXpos > 10 && this->m_iYpos > 50)
+		if (this->m_iXpos > 27 && this->m_iYpos > 67)
 		{
 			this->m_iXpos -= 3;
 			this->m_iYpos -= 2;
@@ -226,7 +226,7 @@ void CPlayerObject::InputActionProc()
 
 	case KeyList::eACTION_MOVE_LD:
 
-		if (this->m_iXpos > 10 && this->m_iYpos < 470)
+		if (this->m_iXpos > 27 && this->m_iYpos < 467)
 		{
 			this->m_iXpos -= 3;
 			this->m_iYpos += 2;
@@ -251,7 +251,7 @@ void CPlayerObject::InputActionProc()
 
 	case KeyList::eACTION_MOVE_RU:
 
-		if (this->m_iXpos < 630 && this->m_iYpos > 50)
+		if (this->m_iXpos < 627 && this->m_iYpos > 67)
 		{
 			this->m_iYpos -= 2;
 			this->m_iXpos += 3;
@@ -275,7 +275,7 @@ void CPlayerObject::InputActionProc()
 		break;
 
 	case KeyList::eACTION_MOVE_RD:
-		if (this->m_iXpos < 630 && this->m_iYpos < 470)
+		if (this->m_iXpos < 627 && this->m_iYpos < 467)
 		{
 			this->m_iYpos += 2;
 			this->m_iXpos += 3;

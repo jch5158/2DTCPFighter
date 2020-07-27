@@ -19,7 +19,7 @@
 #define WM_NETWORK (WM_USER+1)
 
 #define SERVERPORT 5000
-#define SERVERIP L"127.0.0.1"
+#define SERVERIP L"192.168.10.15"
 
 #define MAX_LOADSTRING 100
 
@@ -54,9 +54,6 @@ BOOL                InitialGame(void);
 // client socket 분기문입니다.
 BOOL NetworkProc(WPARAM wParam, LPARAM lParam);
 
-// read event 를 발생시키는 함수입니다.
-BOOL ReadEvent();
-
 // send를 처리하는 함수입니다. 
 BOOL SendEvent();
 
@@ -76,6 +73,10 @@ void PackingAttack3(stHeader* pHeader, stPacketCsAttack3* packetCsAttack3, BYTE 
 
 
 // recv 데이터를 분기하여 처리하는 함수입니다. 
+
+// read event 를 발생시키는 함수입니다.
+BOOL ReadEvent();
+
 void PacketProc(BYTE byPacketType, char* Packet);
 
 bool PacketProcCreateCharacter(char* Packet);
