@@ -16,7 +16,7 @@ public:
 
 	CPlayerObject();
 
-	~CPlayerObject();
+	virtual ~CPlayerObject();
 
 	bool actionCheck;
 

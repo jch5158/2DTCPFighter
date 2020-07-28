@@ -29,7 +29,6 @@ struct stPacketCreateMyCharacter
 {	
 	DWORD dwID;
 	BYTE byDirection;
-
 	unsigned short usX;
 	unsigned short usY;
 	BYTE byHP;
@@ -98,9 +97,6 @@ struct stPacketCsMoveStop
 	unsigned short usX;
 	unsigned short usY;
 };
-
-
-
 
 
 

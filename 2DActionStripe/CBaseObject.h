@@ -6,7 +6,7 @@ public:
 	
 	CBaseObject();
 
-	~CBaseObject();
+	virtual ~CBaseObject();
 	
 	unsigned int GetX();
 

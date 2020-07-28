@@ -64,6 +64,7 @@ CDamageEffect::CDamageEffect(unsigned short usX, unsigned short usY,DWORD action
 
 }
 
+CDamageEffect::~CDamageEffect() {}
 
 void CDamageEffect::Update()
 {

@@ -148,6 +148,7 @@
     <ClInclude Include="CDamageEffect.h" />
     <ClInclude Include="CFrameSkip.h" />
     <ClInclude Include="CList.h" />
+    <ClInclude Include="CMessage.h" />
     <ClInclude Include="CPlayerObject.h" />
     <ClInclude Include="CRingBuffer.h" />
     <ClInclude Include="CScreenDib.h" />
@@ -164,6 +165,7 @@
     <ClCompile Include="CDamageEffect.cpp" />
     <ClCompile Include="CFrameSkip.cpp" />
     <ClCompile Include="CList.cpp" />
+    <ClCompile Include="CMessage.cpp" />
     <ClCompile Include="CPlayerObject.cpp" />
     <ClCompile Include="CRingBuffer.cpp" />
     <ClCompile Include="CScreenDib.cpp" />

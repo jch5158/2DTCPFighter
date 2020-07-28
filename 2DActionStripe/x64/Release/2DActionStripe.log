@@ -1,11 +1,7 @@
 ﻿  2DActionStripe.cpp
-C:\Users\jch35\source\repos\2DActionStripe\2DActionStripe\2DActionStripe.cpp(772,47): warning C4244: '=': 'DWORD'에서 'BYTE'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-C:\Users\jch35\source\repos\2DActionStripe\2DActionStripe\2DActionStripe.cpp(1245,11): warning C4101: 'victimID' :참조되지 않은 지역 변수입니다.
-C:\Users\jch35\source\repos\2DActionStripe\2DActionStripe\2DActionStripe.cpp(1244,11): warning C4101: 'dwAttackerID' :참조되지 않은 지역 변수입니다.
-C:\Users\jch35\source\repos\2DActionStripe\2DActionStripe\2DActionStripe.cpp(1246,10): warning C4101: 'byDamageHP' :참조되지 않은 지역 변수입니다.
   코드를 생성하고 있습니다.
-  1 of 116 functions ( 0.9%) were compiled, the rest were copied from previous compilation.
+  6 of 132 functions ( 4.5%) were compiled, the rest were copied from previous compilation.
     0 functions were new in current compilation
-    0 functions had inline decision re-evaluated but remain unchanged
+    2 functions had inline decision re-evaluated but remain unchanged
   코드를 생성했습니다.
   2DActionStripe.vcxproj -> C:\Users\jch35\source\repos\2DActionStripe\x64\Release\2DActionStripe.exe

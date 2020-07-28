@@ -6,6 +6,7 @@
 
 #include "framework.h"
 #include "protocol.h"
+#include "CMessage.h"
 #include "2DActionStripe.h"
 #include "CRingBuffer.h"
 #include "CList.h"
@@ -19,7 +20,7 @@
 #define WM_NETWORK (WM_USER+1)
 
 #define SERVERPORT 5000
-#define SERVERIP L"192.168.10.15"
+#define SERVERIP L"127.0.0.1"
 
 #define MAX_LOADSTRING 100
 
@@ -61,15 +62,17 @@ BOOL SendPacket(stHeader* pHeader, char* pPacket);
 
 void SendProc();
 
-void PackingMoveStart(stHeader* pHeader, stPacketCsMoveStart *packetCsMoveStart,BYTE dirCur, unsigned short usX, unsigned short usY);
+//void PackingMoveStart(stHeader* pHeader, stPacketCsMoveStart *packetCsMoveStart,BYTE dirCur, unsigned short usX, unsigned short usY);
 
-void PackingMoveStop(stHeader* pHeader, stPacketCsMoveStop* packetCsMoveStop, BYTE dirCur, unsigned short usX, unsigned short usY);
+void PackingMoveStart(stHeader* pHeader, CMessage* message, BYTE dirCur, unsigned short usX, unsigned short usY);
 
-void PackingAttack1(stHeader* pHeader, stPacketCsAttack1* packetCsAttack1, BYTE dirCur, unsigned short usX, unsigned short usY);
+void PackingMoveStop(stHeader* pHeader, CMessage* message, BYTE dirCur, unsigned short usX, unsigned short usY);
 
-void PackingAttack2(stHeader* pHeader, stPacketCsAttack2* packetCsAttack2, BYTE dirCur, unsigned short usX, unsigned short usY);
+void PackingAttack1(stHeader* pHeader, CMessage* message, BYTE dirCur, unsigned short usX, unsigned short usY);
 
-void PackingAttack3(stHeader* pHeader, stPacketCsAttack3* packetCsAttack3, BYTE dirCur, unsigned short usX, unsigned short usY);
+void PackingAttack2(stHeader* pHeader, CMessage* message, BYTE dirCur, unsigned short usX, unsigned short usY);
+
+void PackingAttack3(stHeader* pHeader, CMessage* message, BYTE dirCur, unsigned short usX, unsigned short usY);
 
 
 // recv 데이터를 분기하여 처리하는 함수입니다. 
@@ -77,27 +80,30 @@ void PackingAttack3(stHeader* pHeader, stPacketCsAttack3* packetCsAttack3, BYTE 
 // read event 를 발생시키는 함수입니다.
 BOOL ReadEvent();
 
-void PacketProc(BYTE byPacketType, char* Packet);
+//void PacketProc(BYTE byPacketType, char* Packet);
 
-bool PacketProcCreateCharacter(char* Packet);
+void PacketProc(BYTE byPacketType, CMessage* message);
 
-bool PacketProcCreateOtherCharacter(char* Packet);
+// char* Packet
+bool PacketProcCreateCharacter(CMessage* message);
 
-bool PacketProcDeleteCharacter(char* Packet);
+bool PacketProcCreateOtherCharacter(CMessage* message);
 
-bool PacketProcOtherCharacterMoveStart(char* Packet);
+bool PacketProcDeleteCharacter(CMessage* message);
 
-bool PacketProcOtherCharacterMoveStop(char* Packet);
+bool PacketProcOtherCharacterMoveStart(CMessage* message);
 
-bool PacketProcScAttack1(char* Packet);
+bool PacketProcOtherCharacterMoveStop(CMessage* message);
 
-bool PacketProcScAttack2(char* Packet);
+bool PacketProcScAttack1(CMessage* message);
 
-bool PacketProcScAttack3(char* Packet);
+bool PacketProcScAttack2(CMessage* message);
 
-bool PacketProcDamage(char* Packet);
+bool PacketProcScAttack3(CMessage* message);
 
-bool PacketProcScSync(char* Packet);
+bool PacketProcDamage(CMessage* message);
+
+bool PacketProcScSync(CMessage* message);
 
 // ================================================================
 
@@ -603,85 +609,88 @@ void SendProc()
 {
     stHeader header;
 
-    stPacketCsMoveStart moveStart;
-    stPacketCsMoveStop moveStop;
+    //stPacketCsMoveStart moveStart;
+    //stPacketCsMoveStop moveStop;
+    //stPacketCsAttack1 attack1;
+    //stPacketCsAttack2 attack2;
+    //stPacketCsAttack3 attack3;
 
-    stPacketCsAttack1 attack1;
-    stPacketCsAttack2 attack2;
-    stPacketCsAttack3 attack3;
+
+    CMessage message;
+
 
     switch (playerObj->m_dwActionCur)
     {
     case eACTION_MOVE_LL:
 
-        PackingMoveStart(&header, &moveStart,playerObj->m_dwDirCur,playerObj->m_iXpos,playerObj->m_iYpos);
-        SendPacket(&header, (char*)&moveStart);
+        PackingMoveStart(&header, &message,playerObj->m_dwDirCur,playerObj->m_iXpos,playerObj->m_iYpos);
+        SendPacket(&header, (char*)message.GetBufferPtr());
 
         break;
     case eACTION_MOVE_LU:
 
-        PackingMoveStart(&header, &moveStart, playerObj->m_dwDirCur, playerObj->m_iXpos, playerObj->m_iYpos);
-        SendPacket(&header, (char*)&moveStart);
+        PackingMoveStart(&header, &message, playerObj->m_dwDirCur, playerObj->m_iXpos, playerObj->m_iYpos);
+        SendPacket(&header, (char*)message.GetBufferPtr());
 
         break;
     case eACTION_MOVE_UU:
-        PackingMoveStart(&header, &moveStart, playerObj->m_dwDirCur, playerObj->m_iXpos, playerObj->m_iYpos);
-        SendPacket(&header, (char*)&moveStart);
+        PackingMoveStart(&header, &message, playerObj->m_dwDirCur, playerObj->m_iXpos, playerObj->m_iYpos);
+        SendPacket(&header, (char*)message.GetBufferPtr());
 
         break;
     case eACTION_MOVE_RU:
 
-        PackingMoveStart(&header, &moveStart, playerObj->m_dwDirCur, playerObj->m_iXpos, playerObj->m_iYpos);
-        SendPacket(&header, (char*)&moveStart);
+        PackingMoveStart(&header, &message, playerObj->m_dwDirCur, playerObj->m_iXpos, playerObj->m_iYpos);
+        SendPacket(&header, (char*)message.GetBufferPtr());
 
         break;
     case eACTION_MOVE_RR:
 
-        PackingMoveStart(&header, &moveStart, playerObj->m_dwDirCur, playerObj->m_iXpos, playerObj->m_iYpos);
-        SendPacket(&header, (char*)&moveStart);
+        PackingMoveStart(&header, &message, playerObj->m_dwDirCur, playerObj->m_iXpos, playerObj->m_iYpos);
+        SendPacket(&header, (char*)message.GetBufferPtr());
 
         break;
     case eACTION_MOVE_RD:
 
-        PackingMoveStart(&header, &moveStart, playerObj->m_dwDirCur, playerObj->m_iXpos, playerObj->m_iYpos);
-        SendPacket(&header, (char*)&moveStart);
+        PackingMoveStart(&header, &message, playerObj->m_dwDirCur, playerObj->m_iXpos, playerObj->m_iYpos);
+        SendPacket(&header, (char*)message.GetBufferPtr());
 
         break;
     case eACTION_MOVE_DD:
 
-        PackingMoveStart(&header, &moveStart, playerObj->m_dwDirCur, playerObj->m_iXpos, playerObj->m_iYpos);
-        SendPacket(&header, (char*)&moveStart);
+        PackingMoveStart(&header, &message, playerObj->m_dwDirCur, playerObj->m_iXpos, playerObj->m_iYpos);
+        SendPacket(&header, (char*)message.GetBufferPtr());
 
         break;
     case eACTION_MOVE_LD:
 
-        PackingMoveStart(&header, &moveStart, playerObj->m_dwDirCur, playerObj->m_iXpos, playerObj->m_iYpos);
-        SendPacket(&header, (char*)&moveStart);
+        PackingMoveStart(&header, &message, playerObj->m_dwDirCur, playerObj->m_iXpos, playerObj->m_iYpos);
+        SendPacket(&header, (char*)message.GetBufferPtr());
 
         break;
     case eACTION_ATTACK1:
 
-        PackingAttack1(&header, &attack1, playerObj->m_dwDirCur, playerObj->m_iXpos, playerObj->m_iYpos);
-        SendPacket(&header, (char*)&attack1);
+        PackingAttack1(&header, &message, playerObj->m_dwDirCur, playerObj->m_iXpos, playerObj->m_iYpos);
+        SendPacket(&header, (char*)message.GetBufferPtr());
 
         break;
     case eACTION_ATTACK2:
 
-        PackingAttack2(&header, &attack2, playerObj->m_dwDirCur, playerObj->m_iXpos, playerObj->m_iYpos);
-        SendPacket(&header, (char*)&attack2);
+        PackingAttack2(&header, &message, playerObj->m_dwDirCur, playerObj->m_iXpos, playerObj->m_iYpos);
+        SendPacket(&header, (char*)message.GetBufferPtr());
 
         break;
     case eACTION_ATTACK3:
 
-        PackingAttack3(&header, &attack3, playerObj->m_dwDirCur, playerObj->m_iXpos, playerObj->m_iYpos);
-        SendPacket(&header, (char*)&attack3);
+        PackingAttack3(&header, &message, playerObj->m_dwDirCur, playerObj->m_iXpos, playerObj->m_iYpos);
+        SendPacket(&header, (char*)message.GetBufferPtr());
 
         break;
 
     case eACTION_STAND:
 
-        PackingMoveStop(&header, &moveStop, playerObj->m_dwDirCur, playerObj->m_iXpos, playerObj->m_iYpos);
-        SendPacket(&header, (char*)&moveStop);
+        PackingMoveStop(&header, &message, playerObj->m_dwDirCur, playerObj->m_iXpos, playerObj->m_iYpos);
+        SendPacket(&header, (char*)message.GetBufferPtr());
 
         break;
     default:
@@ -695,16 +704,16 @@ BOOL SendPacket(stHeader* pHeader, char* pPacket)
 {
     int retval;
 
-    retval = session.g_SendQ.Enqueue((char*)pHeader, sizeof(stHeader));
+    /*retval = session.g_SendQ.Enqueue((char*)pHeader, sizeof(stHeader));
     if (retval != sizeof(stHeader))
     {
         printf_s("send enqueue error");
         closesocket(session.g_Socket);
         return false;
-    }
+    }*/
 
-    retval = session.g_SendQ.Enqueue((char*)pPacket, pHeader->bySize);
-    if (retval != pHeader->bySize)
+    retval = session.g_SendQ.Enqueue((char*)pPacket, sizeof(stHeader) + pHeader->bySize);
+    if (retval != sizeof(stHeader) + pHeader->bySize)
     {
         printf_s("send enqueue error");
         closesocket(session.g_Socket);
@@ -764,69 +773,77 @@ BOOL SendEvent()
 }
 
 
-void PackingMoveStart(stHeader* pHeader, stPacketCsMoveStart* packetCsMoveStart, BYTE dirCur, unsigned short usX, unsigned short usY)
+void PackingMoveStart(stHeader* pHeader, CMessage* message, BYTE dirCur, unsigned short usX, unsigned short usY)
 {
     pHeader->byCode = dfNETWORK_PACKET_CODE;
     pHeader->bySize = sizeof(stPacketCsMoveStart);
     pHeader->byType = dfPACKET_CS_MOVE_START;
 
-    packetCsMoveStart->byDirection = playerObj->m_dwActionCur;
-    packetCsMoveStart->usX = usX;
-    packetCsMoveStart->usY = usY;
+    message->PutData((char*)pHeader, sizeof(stHeader));
+
+    message->MoveWritePos(sizeof(stHeader));
+
+    *message << (unsigned char)playerObj->m_dwActionCur << usX << usY;
 
     return;
 }
 
-void PackingMoveStop(stHeader* pHeader, stPacketCsMoveStop* packetCsMoveStop, BYTE dirCur, unsigned short usX, unsigned short usY)
+void PackingMoveStop(stHeader* pHeader, CMessage* message, BYTE dirCur, unsigned short usX, unsigned short usY)
 {
     pHeader->byCode = dfNETWORK_PACKET_CODE;
     pHeader->bySize = sizeof(stPacketCsMoveStop);
     pHeader->byType = dfPACKET_CS_MOVE_STOP;
 
-    packetCsMoveStop->byDirection = dirCur;
-    packetCsMoveStop->usX = usX;
-    packetCsMoveStop->usY = usY;
+    message->PutData((char*)pHeader, sizeof(stHeader));
+
+    message->MoveWritePos(sizeof(stHeader));
+
+    *message << (unsigned char)dirCur << usX << usY;
 
     return;
 }
 
-void PackingAttack1(stHeader* pHeader, stPacketCsAttack1* packetCsAttack1, BYTE dirCur, unsigned short usX, unsigned short usY)
+void PackingAttack1(stHeader* pHeader, CMessage* message, BYTE dirCur, unsigned short usX, unsigned short usY)
 {
     pHeader->byCode = dfNETWORK_PACKET_CODE;
-    pHeader->bySize = sizeof(packetCsAttack1);
+    pHeader->bySize = sizeof(stPacketCsAttack1);
     pHeader->byType = dfPACKET_CS_ATTACK1;
 
-    packetCsAttack1->byDirection = playerObj->m_dwDirCur;
-    packetCsAttack1->usX = usX;
-    packetCsAttack1->usY = usY;
+    message->PutData((char*)pHeader, sizeof(stHeader));
+
+    message->MoveWritePos(sizeof(stHeader));
+
+    *message << (unsigned char)dirCur << usX << usY;
 
     return;
 }
 
-void PackingAttack2(stHeader* pHeader, stPacketCsAttack2* packetCsAttack2, BYTE dirCur, unsigned short usX, unsigned short usY)
+void PackingAttack2(stHeader* pHeader, CMessage* message, BYTE dirCur, unsigned short usX, unsigned short usY)
 {
     pHeader->byCode = dfNETWORK_PACKET_CODE;
-    pHeader->bySize = sizeof(packetCsAttack2);
+    pHeader->bySize = sizeof(stPacketCsAttack2);
     pHeader->byType = dfPACKET_CS_ATTACK2;
 
+    message->PutData((char*)pHeader, sizeof(stHeader));
 
-    packetCsAttack2->byDirection = playerObj->m_dwDirCur;
-    packetCsAttack2->usX = usX;
-    packetCsAttack2->usY = usY;
+    message->MoveWritePos(sizeof(stHeader));
+
+    *message << (unsigned char)dirCur << usX << usY;
 
     return;
 }
 
-void PackingAttack3(stHeader* pHeader, stPacketCsAttack3* packetCsAttack3, BYTE dirCur, unsigned short usX, unsigned short usY)
+void PackingAttack3(stHeader* pHeader, CMessage* message, BYTE dirCur, unsigned short usX, unsigned short usY)
 {
     pHeader->byCode = dfNETWORK_PACKET_CODE;
-    pHeader->bySize = sizeof(packetCsAttack3);
+    pHeader->bySize = sizeof(stPacketCsAttack3);
     pHeader->byType = dfPACKET_CS_ATTACK3;
 
+    message->PutData((char*)pHeader, sizeof(stHeader));
 
-    packetCsAttack3->byDirection = playerObj->m_dwDirCur;
-    packetCsAttack3->usX = usX;
-    packetCsAttack3->usY = usY;
+    message->MoveWritePos(sizeof(stHeader));
+
+    *message << (unsigned char)dirCur << usX << usY;
     
     return;
 }
@@ -981,64 +998,71 @@ BOOL ReadEvent()
             closesocket(session.g_Socket);
             return false;
         }
+ 
+        CMessage message;
 
-        PacketProc(msgBuffer[2], &msgBuffer[3]);
+        message.PutData(&msgBuffer[3], msgBuffer[1]);
+
+        message.MoveWritePos(msgBuffer[1]);
+
+        PacketProc(msgBuffer[2], &message);
+
     }
     return true;
 }
 
-void PacketProc(BYTE byPacketType, char* Packet)
+void PacketProc(BYTE byPacketType, CMessage* message)
 {
     switch (byPacketType)
     {
     case dfPACKET_SC_CREATE_MY_CHARACTER:
 
-        PacketProcCreateCharacter(Packet);
+        PacketProcCreateCharacter(message);
 
         break;
     case dfPACKET_SC_CREATE_OTHER_CHARACTER:
 
-        PacketProcCreateOtherCharacter(Packet);
+        PacketProcCreateOtherCharacter(message);
 
         break;
     case dfPACKET_SC_DELETE_CHARACTER:
 
-        PacketProcDeleteCharacter(Packet);
+        PacketProcDeleteCharacter(message);
 
         break;
     case dfPACKET_SC_MOVE_START:
 
-        PacketProcOtherCharacterMoveStart(Packet);
+        PacketProcOtherCharacterMoveStart(message);
 
         break;
     case dfPACKET_SC_MOVE_STOP:
 
-        PacketProcOtherCharacterMoveStop(Packet);
+        PacketProcOtherCharacterMoveStop(message);
 
         break;
     case dfPACKET_SC_ATTACK1:
 
-        PacketProcScAttack1(Packet);
+        PacketProcScAttack1(message);
 
         break;
     case dfPACKET_SC_ATTACK2:
 
-        PacketProcScAttack2(Packet);
+        PacketProcScAttack2(message);
 
         break;
     case dfPACKET_SC_ATTACK3:
 
-        PacketProcScAttack3(Packet);
+        PacketProcScAttack3(message);
         
         break;
     case dfPACKET_SC_DAMAGE:
 
-        PacketProcDamage(Packet);
+        PacketProcDamage(message);
 
         break;
     case dfPACKET_SC_SYNC:
 
-        PacketProcScSync(Packet);
+        PacketProcScSync(message);
 
         break;
     default:
@@ -1047,49 +1071,79 @@ void PacketProc(BYTE byPacketType, char* Packet)
 
 }
 
-bool PacketProcCreateCharacter(char* Packet)
+bool PacketProcCreateCharacter(CMessage* message)
 {
-    stPacketCreateMyCharacter *CreateMyCharacter = (stPacketCreateMyCharacter*)Packet;
+    //stPacketCreateMyCharacter *CreateMyCharacter = (stPacketCreateMyCharacter*)Packet;
 
-    // ID 셋팅
-    playerObj->m_dwObjectID = CreateMyCharacter->dwID;
-    
-    // 체력 셋팅
-    playerObj->m_chHP = CreateMyCharacter->byHP;
+    //// ID 셋팅
+    //playerObj->m_dwObjectID = CreateMyCharacter->dwID;
+    //
+    //// 체력 셋팅
+    //playerObj->m_chHP = CreateMyCharacter->byHP;
 
-    // 방향 셋팅
-    playerObj->m_dwDirOld = CreateMyCharacter->byDirection;
-    playerObj->m_dwDirCur = CreateMyCharacter->byDirection;
+    //// 방향 셋팅
+    //playerObj->m_dwDirOld = CreateMyCharacter->byDirection;
+    //playerObj->m_dwDirCur = CreateMyCharacter->byDirection;
 
-    // 좌표 셋팅
-    playerObj->m_iXpos = CreateMyCharacter->usX;
-    playerObj->m_iYpos = CreateMyCharacter->usY;
-    
+    //// 좌표 셋팅
+    //playerObj->m_iXpos = CreateMyCharacter->usX;
+    //playerObj->m_iYpos = CreateMyCharacter->usY;
+  
+    unsigned int uiID;
+    unsigned char uchDir;
+    unsigned short usX;
+    unsigned short usY;
+    unsigned char uchHP;
+
+    *message >> uiID >> uchDir >> usX >> usY >> uchHP;
+
+    playerObj->m_dwObjectID = uiID;
+    playerObj->m_dwDirOld = uchDir;
+    playerObj->m_dwDirCur = uchDir;
+    playerObj->m_iXpos = usX;
+    playerObj->m_iYpos = usY;
+    playerObj->m_chHP = uchHP;
+
     // 이터레이터 푸쉬
     objList.PushBack(playerObj);
 
     return true;
 }
 
-bool PacketProcCreateOtherCharacter(char* Packet)
+bool PacketProcCreateOtherCharacter(CMessage* message)
 {
     CPlayerObject *enemyPlayer = new CPlayerObject;
 
-    stPacketCreateOtherCharacter *CreateMyCharacter = (stPacketCreateOtherCharacter*)Packet;
+    //stPacketCreateOtherCharacter *CreateMyCharacter = (stPacketCreateOtherCharacter*)Packet;
 
-    // 아이디 셋팅
-    enemyPlayer->m_dwObjectID = CreateMyCharacter->dwID;
-    
-    // 체력 셋팅
-    enemyPlayer->m_chHP = CreateMyCharacter->byHP;
+    //// 아이디 셋팅
+    //enemyPlayer->m_dwObjectID = CreateMyCharacter->dwID;
+    //
+    //// 체력 셋팅
+    //enemyPlayer->m_chHP = CreateMyCharacter->byHP;
 
-    // 방향 셋팅
-    enemyPlayer->m_dwDirOld = CreateMyCharacter->byDirection;
-    enemyPlayer->m_dwDirCur = CreateMyCharacter->byDirection;
+    //// 방향 셋팅
+    //enemyPlayer->m_dwDirOld = CreateMyCharacter->byDirection;
+    //enemyPlayer->m_dwDirCur = CreateMyCharacter->byDirection;
 
-    // 좌표 셋팅
-    enemyPlayer->m_iXpos = CreateMyCharacter->usX;
-    enemyPlayer->m_iYpos = CreateMyCharacter->usY;
+    //// 좌표 셋팅
+    //enemyPlayer->m_iXpos = CreateMyCharacter->usX;
+    //enemyPlayer->m_iYpos = CreateMyCharacter->usY;
+
+    unsigned int uiID;
+    unsigned char uchDir;
+    unsigned short usX;
+    unsigned short usY;
+    unsigned char uchHP;
+
+    *message >> uiID >> uchDir >> usX >> usY >> uchHP;
+
+    enemyPlayer->m_dwObjectID = uiID;
+    enemyPlayer->m_dwDirOld = uchDir;
+    enemyPlayer->m_dwDirCur = uchDir;
+    enemyPlayer->m_iXpos = usX;
+    enemyPlayer->m_iYpos = usY;
+    enemyPlayer->m_chHP = uchHP;
 
     // 이터레이터 푸쉬
     objList.PushBack(enemyPlayer);
@@ -1097,15 +1151,19 @@ bool PacketProcCreateOtherCharacter(char* Packet)
     return true;
 }
 
-bool PacketProcDeleteCharacter(char* Packet)
+bool PacketProcDeleteCharacter(CMessage* message)
 {
-    stPacketDeleteCharacter *deleteCharacter = (stPacketDeleteCharacter*)Packet;
+    //stPacketDeleteCharacter *deleteCharacter = (stPacketDeleteCharacter*)Packet;
+
+    unsigned int uiID;
+
+   *message >> uiID;
 
     CList<CBaseObject*>::Iterator iterE = objList.end();
 
     for (CList<CBaseObject*>::Iterator iter = objList.begin(); iter != iterE; ++iter)
     {
-        if (iter->m_dwObjectID == deleteCharacter->dwID)
+        if (iter->m_dwObjectID == uiID)
         {
             iter->deleteCheck = true;
             return true;
@@ -1113,94 +1171,122 @@ bool PacketProcDeleteCharacter(char* Packet)
     } 
 }
 
-bool PacketProcOtherCharacterMoveStart(char* Packet)
+bool PacketProcOtherCharacterMoveStart(CMessage* message)
 {
-    stPacketScMoveStart *PacketScMoveStart = (stPacketScMoveStart*)Packet;
+   // stPacketScMoveStart *PacketScMoveStart = (stPacketScMoveStart*)Packet;
+
+
+    unsigned int uiID;
+    unsigned char uchDirection;
+    unsigned short usX;
+    unsigned short usY;
+
+    *message >> uiID >> uchDirection >> usX >> usY;
+
 
     CList<CBaseObject*>::Iterator iterE = objList.end();
 
     for (CList<CBaseObject*>::Iterator iter = objList.begin(); iter != iterE; ++iter)
     {
-        if (iter->m_dwObjectID == PacketScMoveStart->dwID)
+        if (iter->m_dwObjectID == uiID)
         {
-            iter->m_ActionInput = PacketScMoveStart->byDirection;
+            iter->m_ActionInput = uchDirection;
 
             switch (iter->m_dwActionCur)
             {
             case KeyList::eACTION_ATTACK1:
-                iter->m_dwActionCur = PacketScMoveStart->byDirection;
+                iter->m_dwActionCur = uchDirection;
 
                 break;
             case KeyList::eACTION_ATTACK2:
-                iter->m_dwActionCur = PacketScMoveStart->byDirection;
+                iter->m_dwActionCur = uchDirection;
 
                 break;
             case KeyList::eACTION_ATTACK3:
-                iter->m_dwActionCur = PacketScMoveStart->byDirection;
+                iter->m_dwActionCur = uchDirection;
 
                 break;
             }
 
 
-            iter->m_iXpos = PacketScMoveStart->usX;
-            iter->m_iYpos = PacketScMoveStart->usY;
+            iter->m_iXpos = usX;
+            iter->m_iYpos = usY;
 
             return true;
         }
     }    
 }
 
-bool PacketProcOtherCharacterMoveStop(char* Packet)
+bool PacketProcOtherCharacterMoveStop(CMessage* message)
 {
 
-    stPacketScMoveStop *PacketScMoveStop = (stPacketScMoveStop*)Packet;
+    //stPacketScMoveStop *PacketScMoveStop = (stPacketScMoveStop*)Packet;
+
+    unsigned int uiID;
+    unsigned char uchbyDirection;
+    unsigned short usX;
+    unsigned short usY;
+
+    *message >> uiID >> uchbyDirection >> usX >> usY;
 
     CList<CBaseObject*>::Iterator iterE = objList.end();
 
     for (CList<CBaseObject*>::Iterator iter = objList.begin(); iter != iterE; ++iter)
     {
-        if (iter->m_dwObjectID == PacketScMoveStop->dwID)
+        if (iter->m_dwObjectID == uiID)
         {
             iter->m_ActionInput = KeyList::eACTION_STAND;        
-            iter->m_iXpos = PacketScMoveStop->usX;
-            iter->m_iYpos = PacketScMoveStop->usY;
+            iter->m_iXpos = usX;
+            iter->m_iYpos = usY;
 
             return true;
         }
     }
 }
 
-bool PacketProcScAttack1(char* Packet)
+bool PacketProcScAttack1(CMessage* message)
 {
-    stPacketScAttack1 *PacketAttack1 = (stPacketScAttack1*)Packet;
+//    stPacketScAttack1 *PacketAttack1 = (stPacketScAttack1*)Packet;
+   
+    unsigned int uiID;
+    unsigned char uchByDirection;
+    unsigned short usX;
+    unsigned short usY;
+
+    *message >> uiID >> uchByDirection >> usX >> usY;
 
     CList<CBaseObject*>::Iterator iterE = objList.end();
 
     for (CList<CBaseObject*>::Iterator iter = objList.begin(); iter != iterE; ++iter)
     {
-        if (iter->m_dwObjectID == PacketAttack1->dwID)
+        if (iter->m_dwObjectID == uiID)
         {
             // 현재 실행중인 메시지를 공격이 아닌 스탠드로 하여 공격 모션에 의해서 
             // 서버의 공격메시지가 씹히지 않도록 하였습니다.
             iter->m_dwActionCur = KeyList::eACTION_STAND;
 
             iter->m_ActionInput = KeyList::eACTION_ATTACK1;
-            iter->m_iXpos = PacketAttack1->usX;
-            iter->m_iYpos = PacketAttack1->usY;
+            iter->m_iXpos = usX;
+            iter->m_iYpos = usY;
             return true;
         }
     }
 }
 
-bool PacketProcScAttack2(char* Packet)
+bool PacketProcScAttack2(CMessage* message)
 {
-    stPacketScAttack2 *PacketAttack2 = (stPacketScAttack2*)Packet;
+    unsigned int uiID;
+    unsigned char uchByDirection;
+    unsigned short usX;
+    unsigned short usY;
+
+    *message >> uiID >> uchByDirection >> usX >> usY;
 
     CList<CBaseObject*>::Iterator iterE = objList.end();
 
     for (CList<CBaseObject*>::Iterator iter = objList.begin(); iter != iterE; ++iter)
     {
-        if (iter->m_dwObjectID == PacketAttack2->dwID)
+        if (iter->m_dwObjectID == uiID)
         {
 
             // 현재 실행중인 메시지를 공격이 아닌 스탠드로 하여 공격 모션에 의해서 
@@ -1208,43 +1294,50 @@ bool PacketProcScAttack2(char* Packet)
             iter->m_dwActionCur = KeyList::eACTION_STAND;
 
             iter->m_ActionInput = KeyList::eACTION_ATTACK2;
-            iter->m_iXpos = PacketAttack2->usX;
-            iter->m_iYpos = PacketAttack2->usY;
+            iter->m_iXpos = usX;
+            iter->m_iYpos = usY;
             return true;
         }
     }
 }
 
-bool PacketProcScAttack3(char* Packet)
+bool PacketProcScAttack3(CMessage* message)
 {
-    stPacketScAttack3 *PacketAttack3 = (stPacketScAttack3*)Packet;
+    unsigned int uiID;
+    unsigned char uchByDirection;
+    unsigned short usX;
+    unsigned short usY;
+
+    *message >> uiID >> uchByDirection >> usX >> usY;
 
     CList<CBaseObject*>::Iterator iterE = objList.end();
 
     for (CList<CBaseObject*>::Iterator iter = objList.begin(); iter != iterE; ++iter)
     {
-        if (iter->m_dwObjectID == PacketAttack3->dwID)
+        if (iter->m_dwObjectID == uiID)
         {
             // 현재 실행중인 메시지를 공격이 아닌 스탠드로 하여 공격 모션에 의해서 
             // 서버의 공격메시지가 씹히지 않도록 하였습니다.
             iter->m_dwActionCur = KeyList::eACTION_STAND;
 
             iter->m_ActionInput = KeyList::eACTION_ATTACK3;
-            iter->m_iXpos = PacketAttack3->usX;
-            iter->m_iYpos = PacketAttack3->usY;
+            iter->m_iXpos = usX;
+            iter->m_iYpos = usY;
             return true;
         }
     }
 }
 
-bool PacketProcDamage(char* Packet)
+bool PacketProcDamage(CMessage* message)
 {
 
-    stPacketScDamage* PacketScDamage = (stPacketScDamage*)Packet;
+    //stPacketScDamage* PacketScDamage = (stPacketScDamage*)Packet;
 
-    DWORD dwAttackerID;
-    DWORD victimID;
-    BYTE byDamageHP;
+    unsigned int uiAttackerID;
+    unsigned int uiVictimID;
+    unsigned char uchDamageHP;
+
+    *message >> uiAttackerID >> uiVictimID >> uchDamageHP;
 
     CDamageEffect* effct;
 
@@ -1252,13 +1345,13 @@ bool PacketProcDamage(char* Packet)
 
     for (CList<CBaseObject*>::Iterator iter = objList.begin(); iter != iterE; ++iter)
     {
-        if (iter->m_dwObjectID == PacketScDamage->victimID)
+        if (iter->m_dwObjectID == uiVictimID)
         {
-            iter->m_chHP = PacketScDamage->byDamageHP;
+            iter->m_chHP = uchDamageHP;
             
             for (CList<CBaseObject*>::Iterator iterIn = objList.begin(); iterIn != iterE; ++iterIn)
             {
-                if (iterIn->m_dwObjectID == PacketScDamage->dwAttackerID)
+                if (iterIn->m_dwObjectID == uiAttackerID)
                 {
                     
                     effct = new CDamageEffect(iter->m_iXpos, iter->m_iYpos,iterIn->m_ActionInput);
@@ -1271,23 +1364,26 @@ bool PacketProcDamage(char* Packet)
         }
     }
 
-    
-
     return true;
 }
 
-bool PacketProcScSync(char* Packet)
+bool PacketProcScSync(CMessage* message)
 {
-    stPacketScSync *PacketSync = (stPacketScSync*)Packet;
+    
+    unsigned int uiID;
+    unsigned short usX;
+    unsigned short usY;
+
+    *message >> uiID >> usX >> usY;
 
     CList<CBaseObject*>::Iterator iterE = objList.end();
 
     for (CList<CBaseObject*>::Iterator iter = objList.begin(); iter != iterE; ++iter)
     {
-        if (iter->m_dwObjectID == PacketSync->dwID)
+        if (iter->m_dwObjectID == uiID)
         {
-            iter->m_iXpos = PacketSync->usX;
-            iter->m_iYpos = PacketSync->usY;
+            iter->m_iXpos = usX;
+            iter->m_iYpos = usY;
             return true;
         }
     }
