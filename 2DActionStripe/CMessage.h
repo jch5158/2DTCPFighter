@@ -18,7 +18,7 @@ public:
 			     
 	int          MoveWritePos(int iSize);
 		         
-	int          MoveReadPos(int iSize);\
+	int          MoveReadPos(int iSize);
 		         
 	int          GetData(char* chpDest, int iSize);
 		         

@@ -1,7 +1,26 @@
-﻿  CSpriteDib.cpp
+﻿  2DActionStripe.cpp
+  CBaseObject.cpp
+  CDamageEffect.cpp
+  CExceptionObject.cpp
+C:\Users\jch35\source\repos\2DActionStripe\2DActionStripe\CExceptionObject.cpp(26,29): warning C4154: 배열 식을 삭제했습니다. 포인터로 변환이 제공됩니다.
+C:\Users\jch35\source\repos\2DActionStripe\2DActionStripe\CExceptionObject.cpp(27,31): warning C4154: 배열 식을 삭제했습니다. 포인터로 변환이 제공됩니다.
+  CFrameSkip.cpp
+  CList.cpp
+  CMessage.cpp
+  CPlayerObject.cpp
+  CRingBuffer.cpp
+  CSpriteDib.cpp
+  protocol.cpp
   코드를 생성하고 있습니다.
-  0 of 71 functions ( 0.0%) were compiled, the rest were copied from previous compilation.
-    0 functions were new in current compilation
-    0 functions had inline decision re-evaluated but remain unchanged
+C:\Users\jch35\source\repos\2DActionStripe\2DActionStripe\2DActionStripe.cpp(1247): warning C4715: 'PacketProcOtherCharacterMoveStop': 모든 제어 경로에서 값을 반환하지는 않습니다.
+C:\Users\jch35\source\repos\2DActionStripe\2DActionStripe\2DActionStripe.cpp(1304): warning C4715: 'PacketProcScAttack2': 모든 제어 경로에서 값을 반환하지는 않습니다.
+C:\Users\jch35\source\repos\2DActionStripe\2DActionStripe\2DActionStripe.cpp(1392): warning C4715: 'PacketProcScSync': 모든 제어 경로에서 값을 반환하지는 않습니다.
+C:\Users\jch35\source\repos\2DActionStripe\2DActionStripe\2DActionStripe.cpp(1276): warning C4715: 'PacketProcScAttack1': 모든 제어 경로에서 값을 반환하지는 않습니다.
+C:\Users\jch35\source\repos\2DActionStripe\2DActionStripe\2DActionStripe.cpp(1174): warning C4715: 'PacketProcDeleteCharacter': 모든 제어 경로에서 값을 반환하지는 않습니다.
+C:\Users\jch35\source\repos\2DActionStripe\2DActionStripe\2DActionStripe.cpp(1220): warning C4715: 'PacketProcOtherCharacterMoveStart': 모든 제어 경로에서 값을 반환하지는 않습니다.
+C:\Users\jch35\source\repos\2DActionStripe\2DActionStripe\2DActionStripe.cpp(1331): warning C4715: 'PacketProcScAttack3': 모든 제어 경로에서 값을 반환하지는 않습니다.
+  109 of 132 functions (82.6%) were compiled, the rest were copied from previous compilation.
+    69 functions were new in current compilation
+    1 functions had inline decision re-evaluated but remain unchanged
   코드를 생성했습니다.
   2DActionStripe.vcxproj -> C:\Users\jch35\source\repos\2DActionStripe\Release\2DActionStripe.exe

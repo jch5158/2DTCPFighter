@@ -7,6 +7,7 @@
 #include "framework.h"
 #include "protocol.h"
 #include "CMessage.h"
+#include "CExceptionObject.h"
 #include "2DActionStripe.h"
 #include "CRingBuffer.h"
 #include "CList.h"
@@ -62,6 +63,7 @@ BOOL SendPacket(stHeader* pHeader, char* pPacket);
 
 void SendProc();
 
+// 구조체를 사용한 예제입니다.
 //void PackingMoveStart(stHeader* pHeader, stPacketCsMoveStart *packetCsMoveStart,BYTE dirCur, unsigned short usX, unsigned short usY);
 
 void PackingMoveStart(stHeader* pHeader, CMessage* message, BYTE dirCur, unsigned short usX, unsigned short usY);
@@ -80,6 +82,7 @@ void PackingAttack3(stHeader* pHeader, CMessage* message, BYTE dirCur, unsigned 
 // read event 를 발생시키는 함수입니다.
 BOOL ReadEvent();
 
+// 구조체를 사용한 예제입니다.
 //void PacketProc(BYTE byPacketType, char* Packet);
 
 void PacketProc(BYTE byPacketType, CMessage* message);
@@ -1005,8 +1008,27 @@ BOOL ReadEvent()
 
         message.MoveWritePos(msgBuffer[1]);
 
-        PacketProc(msgBuffer[2], &message);
+        try
+        {
+            PacketProc(msgBuffer[2], &message);
+        }
+        catch (CExceptionObject& exception)
+        {
+            FILE* fp;
 
+            fopen_s(&fp, "ErrorDump.txt", "a+t");
+
+            for (int iCnt = 0; iCnt < exception.m_BufferSize; ++iCnt)
+            {
+                fprintf_s(fp, "%02x ", exception.m_MessageLog[iCnt]);
+            }
+
+            fwrite(exception.m_ErrorDataLog, 1, sizeof(exception.m_ErrorDataLog),fp);
+
+            fclose(fp);
+        }
+
+        
     }
     return true;
 }
@@ -1414,7 +1436,6 @@ void BubbleSort()
     }
 
 }
-
 
 void DeleteObject()
 {
