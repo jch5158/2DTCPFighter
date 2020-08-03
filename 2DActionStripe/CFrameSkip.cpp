@@ -54,10 +54,15 @@ bool CFrameSkip::FrameSkip()
 	//dwMaxFPS == 20 이다.	
 	if (this->m_dwOneFrameTime < this->m_dwMaxFPS)
 	{	
+		// 이번에 Sleep 해야될 시간 == ( 한 프레임 - 그 전 로직부터 지금까지 걸린 시간 )
 		Sleep(this->m_dwMaxFPS - this->m_dwOneFrameTime);
 
+		// Sleep 으로 지난 시간을 다시 셋팅해준다. 
+		// TimeGetTime()을 다시 호출하여 얻은 시간은 정확하지 않기 때문에 
+		// nowTime + Sleep 으로 쉰 시간만큼 셋팅해준다. 
 		oldTime = nowTime+(this->m_dwMaxFPS-this->m_dwOneFrameTime);
 	
+		// 로직 시간 체크 변수를 리셋해준다.
 		this->m_dwOneFrameTime = 0;
 
 		return true;
@@ -73,17 +78,19 @@ bool CFrameSkip::FrameSkip()
 		//	return false;
 		//}	
 
+		// 이번 프레임에서 20을 경과했다고 해서 바로 랜더를 스킵하지 않는다.
+		// 로직 시간 체크 변수에서 - Sleep 시간만큼 빼고 남은 로직 시간 체크 변수에서
+		// 20 이상이 남았을 경우 랜더를 스킵한다.
 		this->m_dwOneFrameTime -= this->m_dwMaxFPS;
 
-		oldTime = timeGetTime();
+		oldTime = nowTime;
 
-		if (this->m_dwOneFrameTime >=this->m_dwMaxFPS)
+		if (this->m_dwOneFrameTime >= this->m_dwMaxFPS)
 		{
 			this->m_dwOneFrameTime -= this->m_dwMaxFPS;
 			
 			return false;
 		}	
-
 	}
 
 	return true;
