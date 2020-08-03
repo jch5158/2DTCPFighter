@@ -58,6 +58,7 @@ int CRingBuffer::GetFreeSize(void)
 int CRingBuffer::DirectEnqueueSize(void)
 {
 
+	// 
 	if (this->rear == this->mQueueLen - 1 && this->front == this->mQueueLen - 1)
 	{
 		return this->mQueueLen - 1;

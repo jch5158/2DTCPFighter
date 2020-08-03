@@ -148,6 +148,7 @@
     <ClInclude Include="CDamageEffect.h" />
     <ClInclude Include="CExceptionObject.h" />
     <ClInclude Include="CFrameSkip.h" />
+    <ClInclude Include="CFreeList.h" />
     <ClInclude Include="CList.h" />
     <ClInclude Include="CMessage.h" />
     <ClInclude Include="CPlayerObject.h" />
@@ -166,6 +167,7 @@
     <ClCompile Include="CDamageEffect.cpp" />
     <ClCompile Include="CExceptionObject.cpp" />
     <ClCompile Include="CFrameSkip.cpp" />
+    <ClCompile Include="CFreeList.cpp" />
     <ClCompile Include="CList.cpp" />
     <ClCompile Include="CMessage.cpp" />
     <ClCompile Include="CPlayerObject.cpp" />

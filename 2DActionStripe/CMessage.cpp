@@ -73,8 +73,8 @@
 	}
 
 	CMessage& CMessage::operator << (char chValue)
-	{	
-		memcpy(&this->m_buffer[this->rear + 1], &chValue, sizeof(char));
+	{				
+		this->m_buffer[this->rear + 1] = chValue;
 
 		this->rear += sizeof(char);
 
@@ -82,8 +82,8 @@
 	}
 
 	CMessage& CMessage::operator << (unsigned char uchValue)
-	{
-		memcpy(&this->m_buffer[this->rear + 1], &uchValue, sizeof(char));
+	{		
+		this->m_buffer[this->rear + 1] = (unsigned char)uchValue;
 
 		this->rear += sizeof(char);
 
@@ -92,16 +92,20 @@
 
 	CMessage& CMessage::operator << (short sValue)
 	{
-		memcpy(&this->m_buffer[this->rear + 1], &sValue, sizeof(short));
-	
+		short *shortBuffer = (short*)&(this->m_buffer[this->rear + 1]);
+
+		*shortBuffer = sValue;
+
 		this->rear += sizeof(short);
 
 		return *this;
 	}
 
 	CMessage& CMessage::operator << (unsigned short usValue)
-	{
-		memcpy(&this->m_buffer[this->rear + 1], &usValue, sizeof(short));
+	{	
+		unsigned short* unShortBuffer = (unsigned short*)&(this->m_buffer[this->rear + 1]);
+
+		*unShortBuffer = usValue;
 
 		this->rear += sizeof(short);
 
@@ -109,8 +113,10 @@
 	}
 
 	CMessage& CMessage::operator << (int iValue)
-	{		
-		memcpy(&this->m_buffer[this->rear+1], &iValue, sizeof(int));
+	{				
+		int* intBuffer = (int*)&(this->m_buffer[this->rear + 1]);
+
+		*intBuffer = iValue;
 
 		this->rear += sizeof(int);
 
@@ -119,7 +125,9 @@
 
 	CMessage& CMessage::operator << (unsigned int uiValue)
 	{
-		memcpy(&this->m_buffer[this->rear + 1], &uiValue, sizeof(int));
+		int* unIntBuffer = (int*)&(this->m_buffer[this->rear + 1]);
+
+		*unIntBuffer = uiValue;
 
 		this->rear += sizeof(int);
 
@@ -127,8 +135,10 @@
 	}
 
 	CMessage& CMessage::operator << (long lValue)
-	{
-		memcpy(&this->m_buffer[this->rear+1], &lValue, sizeof(long));
+	{	
+		long* longBuffer = (long*)&(this->m_buffer[this->rear + 1]);
+
+		*longBuffer = lValue;
 
 		this->rear += sizeof(long);
 
@@ -137,7 +147,11 @@
 
 	CMessage& CMessage::operator << (unsigned long ulValue)
 	{
-		memcpy(&this->m_buffer[this->rear + 1], &ulValue, sizeof(long));
+
+		unsigned long* unLongBuffer = (unsigned long*)&(this->m_buffer[this->rear + 1]);
+
+		*unLongBuffer = ulValue;
+
 
 		this->rear += sizeof(long);
 
@@ -146,15 +160,15 @@
 
 	CMessage& CMessage::operator >> (char &chValue)
 	{		
-		if (GetDataSize() < sizeof(chValue))
+		if (this->m_iDataSize < sizeof(chValue))
 		{
 			CExceptionObject exception(this->m_buffer,this->rear+1," char\n");
 
 			throw exception;
 		}
-
-		memcpy(&chValue, &this->m_buffer[this->front + 1], sizeof(char));
 	
+		chValue = *((char*)&(this->m_buffer[this->front + 1]));
+
 		this->front += sizeof(char);
 
 		return *this;
@@ -162,14 +176,15 @@
 
 	CMessage& CMessage::operator >> (unsigned char &uchValue)
 	{
-		if (GetDataSize() < sizeof(uchValue))
+		if (this->m_iDataSize < sizeof(uchValue))
 		{
 			CExceptionObject exception(this->m_buffer, this->rear + 1, " unsigned char\n");
 
 			throw exception;
 		}
+		
+		uchValue = *((unsigned char*)&(this->m_buffer[this->front + 1]));
 
-		memcpy(&uchValue, &this->m_buffer[this->front + 1], sizeof(char));
 
 		this->front += sizeof(char);
 
@@ -179,14 +194,14 @@
 	CMessage& CMessage::operator >> (short &sValue)
 	{	
 
-		if (GetDataSize() < sizeof(sValue))
+		if (this->m_iDataSize < sizeof(sValue))
 		{
 			CExceptionObject exception(this->m_buffer, this->rear + 1, " short\n");
 
 			throw exception;
 		}
-
-		memcpy(&sValue, &this->m_buffer[this->front + 1], sizeof(short));
+	
+		sValue = *((short*)&(this->m_buffer[this->front + 1]));
 
 		this->front += sizeof(short);
 
@@ -196,15 +211,14 @@
 
 	CMessage& CMessage::operator >> (unsigned short &usValue)
 	{
-
-		if (GetDataSize() < sizeof(usValue))
+		if (this->m_iDataSize < sizeof(usValue))
 		{
 			CExceptionObject exception(this->m_buffer, this->rear + 1, " unsigned short\n");
 
 			throw exception;
 		}
-
-		memcpy(&usValue, &this->m_buffer[this->front + 1], sizeof(short));
+	
+		usValue = *((unsigned short*)&(this->m_buffer[this->front + 1]));
 
 		this->front += sizeof(short);
 
@@ -214,34 +228,31 @@
 	CMessage& CMessage::operator >> (int &iValue)
 	{
 
-		if (GetDataSize() < sizeof(iValue))
+		if (this->m_iDataSize < sizeof(iValue))
 		{
 			CExceptionObject exception(this->m_buffer, this->rear + 1, " int\n");
 
 			throw exception;
 		}
-
 		
-		memcpy(&iValue, &this->m_buffer[this->front + 1], sizeof(int));
+		iValue = *((int*)&(this->m_buffer[this->front + 1]));
 
 		this->front += sizeof(int);
-
 
 		return *this;
 	}
 
 	CMessage& CMessage::operator >> (unsigned int &uiValue)
 	{
-		if (GetDataSize() < sizeof(uiValue))
+		if (this->m_iDataSize < sizeof(uiValue))
 		{
 			CExceptionObject exception(this->m_buffer, this->rear + 1, " unsigned int\n");
 
 			throw exception;
 		}
+		
+		uiValue = *((unsigned int*)&(this->m_buffer[this->front + 1]));
 
-		char* buffer = &this->m_buffer[this->front + 1];
-
-		memcpy(&uiValue, buffer, sizeof(int));
 
 		this->front += sizeof(int);
 
@@ -251,14 +262,14 @@
 	CMessage& CMessage::operator >> (long &lValue)
 	{
 
-		if (GetDataSize() < sizeof(lValue))
+		if (this->m_iDataSize < sizeof(lValue))
 		{
 			CExceptionObject exception(this->m_buffer, this->rear + 1, " long\n");
 
 			throw exception;
 		}
 
-		memcpy(&lValue, &this->m_buffer[this->front + 1], sizeof(long));
+		lValue = *((long*)&(this->m_buffer[this->front + 1]));
 
 		this->front += sizeof(long);
 
@@ -268,14 +279,14 @@
 	CMessage& CMessage::operator >> (unsigned long &ulValue)
 	{
 
-		if (GetDataSize() < sizeof(ulValue))
+		if (this->m_iDataSize < sizeof(ulValue))
 		{
 			CExceptionObject exception(this->m_buffer, this->rear + 1, " unsigned long\n");
 
 			throw exception;
 		}
 
-		memcpy(&ulValue, &this->m_buffer[this->front + 1], sizeof(long));
+		ulValue = *((unsigned long*)&(this->m_buffer[this->front + 1]));
 
 		this->front += sizeof(long);
 
