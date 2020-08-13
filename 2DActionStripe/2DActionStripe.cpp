@@ -1428,7 +1428,7 @@ void BubbleSort()
 
             if (iter->m_iYpos > iterN->m_iYpos)
             {
-                objList.DataSwap(iter, iterE);
+                objList.DataSwap(iter, iterN);
             }
         }
 
