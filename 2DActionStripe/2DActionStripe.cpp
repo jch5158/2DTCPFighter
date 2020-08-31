@@ -1026,9 +1026,7 @@ BOOL ReadEvent()
             fwrite(exception.m_ErrorDataLog, 1, sizeof(exception.m_ErrorDataLog),fp);
 
             fclose(fp);
-        }
-
-        
+        } 
     }
     return true;
 }

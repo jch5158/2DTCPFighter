@@ -1,9 +1,8 @@
 #pragma once
 
 
-
-
 #ifndef __PACKET_DEFINE__
+
 #define __PACKET_DEFINE__
 
 
