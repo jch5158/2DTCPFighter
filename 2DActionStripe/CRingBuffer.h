@@ -88,6 +88,12 @@ public:
 	/////////////////////////////////////////////////////////////////////////
 	char* GetRearBufferPtr(void);
 
+
+	bool IsEmpty();
+
+
+	void Release();
+
 public:
 
 	char* mRingBuffer;
