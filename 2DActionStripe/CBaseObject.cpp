@@ -1,10 +1,7 @@
 #include "framework.h"
 
-#include "CList.h"
-
 #include "CScreenDib.h"
 #include "CSpriteDib.h"
-
 #include "CBaseObject.h"
 #include "CPlayerObject.h"
 

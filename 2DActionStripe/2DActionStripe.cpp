@@ -10,7 +10,6 @@
 #include "CExceptionObject.h"
 #include "2DActionStripe.h"
 #include "CRingBuffer.h"
-#include "CList.h"
 #include "CFrameSkip.h"
 #include "CSpriteDib.h"
 #include "CScreenDib.h"
@@ -32,6 +31,7 @@ struct Session
     CRingBuffer g_SendQ;
     bool g_ConnectCheck;
 };
+
 
 
 Session session;
@@ -115,7 +115,7 @@ BOOL Render(void);
 
 void DeleteObject();
 void Update(void);
-void BubbleSort();
+void ListYaxixSort();
 void KeyProcess();
 
 // 윈도우 크기 렉트
@@ -137,7 +137,9 @@ enum e_GameScene GameState = e_GameScene::GAME;
 
 CPlayerObject* playerObj = new CPlayerObject;
 
-CList<CBaseObject*> objList;
+
+std::list<CBaseObject*> objList;
+
 
 // 프레임 스킵 함수를 호출하는 객체입니다.
 CFrameSkip frameSkip;
@@ -430,14 +432,21 @@ BOOL Render(void)
     // 백버퍼에 그리기
     SpriteDib.DrawImage(0, 0, 0, pDestDib, DestWidth, DestHeight, pitch);
 
-    BubbleSort();
+    ListYaxixSort();
     
-    CList<CBaseObject*>::Iterator iterE = objList.end();
+    /*CList<CBaseObject*>::Iterator iterE = objList.end();
 
     for (CList<CBaseObject*>::Iterator iter = objList.begin(); iter != iterE; ++iter)
     {
         iter->Render(); 
-    } 
+    } */
+
+    auto iterE = objList.end();
+
+    for (auto iter = objList.begin(); iter != iterE; ++iter)
+    {
+        (*iter)->Render();
+    }
 
     ScreenDib.Filp(g_hWnd);
 
@@ -446,12 +455,20 @@ BOOL Render(void)
 
 void Update(void) {
 
-    CList<CBaseObject*>::Iterator iterE = objList.end();
+    /*CList<CBaseObject*>::Iterator iterE = objList.end();
 
     for (CList<CBaseObject*>::Iterator iter = objList.begin(); iter != iterE; ++iter)
     {
         iter->Update();
+    }*/
+
+    auto iterE = objList.end();
+
+    for (auto iter = objList.begin(); iter != iterE; ++iter)
+    {
+        (*iter)->Update();
     }
+
 
     if (playerObj->actionCheck)
     {
@@ -1092,23 +1109,7 @@ void PacketProc(BYTE byPacketType, CMessage* message)
 }
 
 bool PacketProcCreateCharacter(CMessage* message)
-{
-    //stPacketCreateMyCharacter *CreateMyCharacter = (stPacketCreateMyCharacter*)Packet;
-
-    //// ID 셋팅
-    //playerObj->m_dwObjectID = CreateMyCharacter->dwID;
-    //
-    //// 체력 셋팅
-    //playerObj->m_chHP = CreateMyCharacter->byHP;
-
-    //// 방향 셋팅
-    //playerObj->m_dwDirOld = CreateMyCharacter->byDirection;
-    //playerObj->m_dwDirCur = CreateMyCharacter->byDirection;
-
-    //// 좌표 셋팅
-    //playerObj->m_iXpos = CreateMyCharacter->usX;
-    //playerObj->m_iYpos = CreateMyCharacter->usY;
-  
+{  
     unsigned int uiID;
     unsigned char uchDir;
     unsigned short usX;
@@ -1125,7 +1126,9 @@ bool PacketProcCreateCharacter(CMessage* message)
     playerObj->m_chHP = uchHP;
 
     // 이터레이터 푸쉬
-    objList.PushBack(playerObj);
+    //objList.PushBack(playerObj);
+
+    objList.push_back(playerObj);
 
     return true;
 }
@@ -1133,22 +1136,6 @@ bool PacketProcCreateCharacter(CMessage* message)
 bool PacketProcCreateOtherCharacter(CMessage* message)
 {
     CPlayerObject *enemyPlayer = new CPlayerObject;
-
-    //stPacketCreateOtherCharacter *CreateMyCharacter = (stPacketCreateOtherCharacter*)Packet;
-
-    //// 아이디 셋팅
-    //enemyPlayer->m_dwObjectID = CreateMyCharacter->dwID;
-    //
-    //// 체력 셋팅
-    //enemyPlayer->m_chHP = CreateMyCharacter->byHP;
-
-    //// 방향 셋팅
-    //enemyPlayer->m_dwDirOld = CreateMyCharacter->byDirection;
-    //enemyPlayer->m_dwDirCur = CreateMyCharacter->byDirection;
-
-    //// 좌표 셋팅
-    //enemyPlayer->m_iXpos = CreateMyCharacter->usX;
-    //enemyPlayer->m_iYpos = CreateMyCharacter->usY;
 
     unsigned int uiID;
     unsigned char uchDir;
@@ -1166,35 +1153,47 @@ bool PacketProcCreateOtherCharacter(CMessage* message)
     enemyPlayer->m_chHP = uchHP;
 
     // 이터레이터 푸쉬
-    objList.PushBack(enemyPlayer);
+    //objList.PushBack(enemyPlayer);
+
+    objList.push_back(enemyPlayer);
 
     return true;
 }
 
 bool PacketProcDeleteCharacter(CMessage* message)
 {
-    //stPacketDeleteCharacter *deleteCharacter = (stPacketDeleteCharacter*)Packet;
-
     unsigned int uiID;
 
    *message >> uiID;
 
-    CList<CBaseObject*>::Iterator iterE = objList.end();
+    //CList<CBaseObject*>::Iterator iterE = objList.end();
 
-    for (CList<CBaseObject*>::Iterator iter = objList.begin(); iter != iterE; ++iter)
+    //for (CList<CBaseObject*>::Iterator iter = objList.begin(); iter != iterE; ++iter)
+    //{
+    //    if (iter->m_dwObjectID == uiID)
+    //    {
+    //        iter->deleteCheck = true;
+    //        return true;
+    //    }
+    //} 
+
+
+    auto iterE = objList.end();
+
+    for (auto iter = objList.begin(); iter != iterE; ++iter)
     {
-        if (iter->m_dwObjectID == uiID)
+        if ((*iter)->m_dwObjectID == uiID)
         {
-            iter->deleteCheck = true;
+            (*iter)->deleteCheck = true;
             return true;
         }
-    } 
+    }
+
 }
 
 bool PacketProcOtherCharacterMoveStart(CMessage* message)
 {
    // stPacketScMoveStart *PacketScMoveStart = (stPacketScMoveStart*)Packet;
-
 
     unsigned int uiID;
     unsigned char uchDirection;
@@ -1204,33 +1203,33 @@ bool PacketProcOtherCharacterMoveStart(CMessage* message)
     *message >> uiID >> uchDirection >> usX >> usY;
 
 
-    CList<CBaseObject*>::Iterator iterE = objList.end();
+    auto iterE = objList.end();
 
-    for (CList<CBaseObject*>::Iterator iter = objList.begin(); iter != iterE; ++iter)
+    for (auto iter = objList.begin(); iter != iterE; ++iter)
     {
-        if (iter->m_dwObjectID == uiID)
+        if ((*iter)->m_dwObjectID == uiID)
         {
-            iter->m_ActionInput = uchDirection;
+            (*iter)->m_ActionInput = uchDirection;
 
-            switch (iter->m_dwActionCur)
+            switch ((*iter)->m_dwActionCur)
             {
             case KeyList::eACTION_ATTACK1:
-                iter->m_dwActionCur = uchDirection;
+                (*iter)->m_dwActionCur = uchDirection;
 
                 break;
             case KeyList::eACTION_ATTACK2:
-                iter->m_dwActionCur = uchDirection;
+                (*iter)->m_dwActionCur = uchDirection;
 
                 break;
             case KeyList::eACTION_ATTACK3:
-                iter->m_dwActionCur = uchDirection;
+                (*iter)->m_dwActionCur = uchDirection;
 
                 break;
             }
 
 
-            iter->m_iXpos = usX;
-            iter->m_iYpos = usY;
+            (*iter)->m_iXpos = usX;
+            (*iter)->m_iYpos = usY;
 
             return true;
         }
@@ -1239,7 +1238,6 @@ bool PacketProcOtherCharacterMoveStart(CMessage* message)
 
 bool PacketProcOtherCharacterMoveStop(CMessage* message)
 {
-
     //stPacketScMoveStop *PacketScMoveStop = (stPacketScMoveStop*)Packet;
 
     unsigned int uiID;
@@ -1249,15 +1247,15 @@ bool PacketProcOtherCharacterMoveStop(CMessage* message)
 
     *message >> uiID >> uchbyDirection >> usX >> usY;
 
-    CList<CBaseObject*>::Iterator iterE = objList.end();
+    auto iterE = objList.end();
 
-    for (CList<CBaseObject*>::Iterator iter = objList.begin(); iter != iterE; ++iter)
+    for (auto iter = objList.begin(); iter != iterE; ++iter)
     {
-        if (iter->m_dwObjectID == uiID)
+        if ((*iter)->m_dwObjectID == uiID)
         {
-            iter->m_ActionInput = KeyList::eACTION_STAND;        
-            iter->m_iXpos = usX;
-            iter->m_iYpos = usY;
+            (*iter)->m_ActionInput = KeyList::eACTION_STAND;
+            (*iter)->m_iXpos = usX;
+            (*iter)->m_iYpos = usY;
 
             return true;
         }
@@ -1275,19 +1273,19 @@ bool PacketProcScAttack1(CMessage* message)
 
     *message >> uiID >> uchByDirection >> usX >> usY;
 
-    CList<CBaseObject*>::Iterator iterE = objList.end();
+    auto iterE = objList.end();
 
-    for (CList<CBaseObject*>::Iterator iter = objList.begin(); iter != iterE; ++iter)
+    for (auto iter = objList.begin(); iter != iterE; ++iter)
     {
-        if (iter->m_dwObjectID == uiID)
+        if ((*iter)->m_dwObjectID == uiID)
         {
             // 현재 실행중인 메시지를 공격이 아닌 스탠드로 하여 공격 모션에 의해서 
             // 서버의 공격메시지가 씹히지 않도록 하였습니다.
-            iter->m_dwActionCur = KeyList::eACTION_STAND;
+            (*iter)->m_dwActionCur = KeyList::eACTION_STAND;
 
-            iter->m_ActionInput = KeyList::eACTION_ATTACK1;
-            iter->m_iXpos = usX;
-            iter->m_iYpos = usY;
+            (*iter)->m_ActionInput = KeyList::eACTION_ATTACK1;
+            (*iter)->m_iXpos = usX;
+            (*iter)->m_iYpos = usY;
             return true;
         }
     }
@@ -1302,20 +1300,19 @@ bool PacketProcScAttack2(CMessage* message)
 
     *message >> uiID >> uchByDirection >> usX >> usY;
 
-    CList<CBaseObject*>::Iterator iterE = objList.end();
+    auto iterE = objList.end();
 
-    for (CList<CBaseObject*>::Iterator iter = objList.begin(); iter != iterE; ++iter)
+    for (auto iter = objList.begin(); iter != iterE; ++iter)
     {
-        if (iter->m_dwObjectID == uiID)
+        if ((*iter)->m_dwObjectID == uiID)
         {
-
             // 현재 실행중인 메시지를 공격이 아닌 스탠드로 하여 공격 모션에 의해서 
             // 서버의 공격메시지가 씹히지 않도록 하였습니다.
-            iter->m_dwActionCur = KeyList::eACTION_STAND;
+            (*iter)->m_dwActionCur = KeyList::eACTION_STAND;
 
-            iter->m_ActionInput = KeyList::eACTION_ATTACK2;
-            iter->m_iXpos = usX;
-            iter->m_iYpos = usY;
+            (*iter)->m_ActionInput = KeyList::eACTION_ATTACK2;
+            (*iter)->m_iXpos = usX;
+            (*iter)->m_iYpos = usY;
             return true;
         }
     }
@@ -1330,19 +1327,19 @@ bool PacketProcScAttack3(CMessage* message)
 
     *message >> uiID >> uchByDirection >> usX >> usY;
 
-    CList<CBaseObject*>::Iterator iterE = objList.end();
+    auto iterE = objList.end();
 
-    for (CList<CBaseObject*>::Iterator iter = objList.begin(); iter != iterE; ++iter)
+    for (auto iter = objList.begin(); iter != iterE; ++iter)
     {
-        if (iter->m_dwObjectID == uiID)
+        if ((*iter)->m_dwObjectID == uiID)
         {
             // 현재 실행중인 메시지를 공격이 아닌 스탠드로 하여 공격 모션에 의해서 
             // 서버의 공격메시지가 씹히지 않도록 하였습니다.
-            iter->m_dwActionCur = KeyList::eACTION_STAND;
+            (*iter)->m_dwActionCur = KeyList::eACTION_STAND;
 
-            iter->m_ActionInput = KeyList::eACTION_ATTACK3;
-            iter->m_iXpos = usX;
-            iter->m_iYpos = usY;
+            (*iter)->m_ActionInput = KeyList::eACTION_ATTACK3;
+            (*iter)->m_iXpos = usX;
+            (*iter)->m_iYpos = usY;
             return true;
         }
     }
@@ -1361,22 +1358,22 @@ bool PacketProcDamage(CMessage* message)
 
     CDamageEffect* effct;
 
-    CList<CBaseObject*>::Iterator iterE = objList.end();
+    auto iterE = objList.end();
 
-    for (CList<CBaseObject*>::Iterator iter = objList.begin(); iter != iterE; ++iter)
+    for (auto iter = objList.begin(); iter != iterE; ++iter)
     {
-        if (iter->m_dwObjectID == uiVictimID)
+        if ((*iter)->m_dwObjectID == uiVictimID)
         {
-            iter->m_chHP = uchDamageHP;
+            (*iter)->m_chHP = uchDamageHP;
             
-            for (CList<CBaseObject*>::Iterator iterIn = objList.begin(); iterIn != iterE; ++iterIn)
+            for (auto iterIn = objList.begin(); iterIn != iterE; ++iterIn)
             {
-                if (iterIn->m_dwObjectID == uiAttackerID)
-                {
-                    
-                    effct = new CDamageEffect(iter->m_iXpos, iter->m_iYpos,iterIn->m_ActionInput);
+                if ((*iterIn)->m_dwObjectID == uiAttackerID)
+                {                   
+                    // (*iterIn)->m_ActionInput 은 공격자의 액션에 따라서 이펙트 시간이 달라지기 위함
+                    effct = new CDamageEffect((*iter)->m_iXpos, (*iter)->m_iYpos,(*iterIn)->m_ActionInput);
 
-                    objList.PushBack(effct);
+                    objList.push_back(effct);
 
                     return true;
                 }
@@ -1396,14 +1393,14 @@ bool PacketProcScSync(CMessage* message)
 
     *message >> uiID >> usX >> usY;
 
-    CList<CBaseObject*>::Iterator iterE = objList.end();
+    auto iterE = objList.end();
 
-    for (CList<CBaseObject*>::Iterator iter = objList.begin(); iter != iterE; ++iter)
+    for (auto iter = objList.begin(); iter != iterE; ++iter)
     {
-        if (iter->m_dwObjectID == uiID)
+        if ((*iter)->m_dwObjectID == uiID)
         {
-            iter->m_iXpos = usX;
-            iter->m_iYpos = usY;
+            (*iter)->m_iXpos = usX;
+            (*iter)->m_iYpos = usY;
             return true;
         }
     }
@@ -1411,45 +1408,25 @@ bool PacketProcScSync(CMessage* message)
 
 // recv 파트 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-void BubbleSort()
+void ListYaxixSort()
 {
-
-    CList<CBaseObject*>::Iterator iterE = objList.end();
-
-    --iterE;
-
-    for (int iCnt = 0; iCnt < objList.listLength; iCnt++)
-    {
-        for (CList<CBaseObject*>::Iterator iter = objList.begin(); iter != iterE; ++iter)
-        {
-            CList<CBaseObject*>::Iterator iterN = iter.node->next;
-
-            if (iter->m_iYpos > iterN->m_iYpos)
-            {
-                objList.DataSwap(iter, iterN);
-            }
-        }
-
-        --iterE;
-    }
-
+    objList.sort(YaxixCompare<CBaseObject*>());
 }
 
 void DeleteObject()
 {
-    CList<CBaseObject*>::Iterator iterE = objList.end();
+    auto iterE = objList.end();
 
-    for(CList<CBaseObject*>::Iterator iter = objList.begin(); iter != iterE;)
+    for(auto iter = objList.begin(); iter != iterE;)
     {
-        if (iter->deleteCheck)
+        if ((*iter)->deleteCheck)
         {
-            delete (*iter)->data;
+            delete (*iter);
             iter = objList.erase(iter);
         }
         else
         {
             ++iter;
         }
-
     }
 }

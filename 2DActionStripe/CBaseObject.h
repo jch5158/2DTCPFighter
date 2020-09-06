@@ -94,3 +94,13 @@ extern CScreenDib ScreenDib;
 // 배열 최대개수와 컬러키 값 ARGB  -> 리틀 엔디안으로 BGRA
 extern CSpriteDib SpriteDib;
 
+
+template<class T>
+class YaxixCompare
+{
+public:
+	bool operator()(const T leftObject, const T rightObject) const
+	{
+		return leftObject->m_iYpos < rightObject->m_iYpos;
+	};
+};

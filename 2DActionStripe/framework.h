@@ -17,6 +17,7 @@
 // C 런타임 헤더 파일입니다.
 #include <iostream>
 #include <windowsx.h>
+#include <list>
 #include <time.h>
 
 #pragma comment(lib,"winmm.lib")
