@@ -199,20 +199,10 @@ int CRingBuffer::Dequeue(char* chpDest, int iSize)
 /////////////////////////////////////////////////////////////////////////
 int CRingBuffer::Peek(char* chpDest, int iSize)
 {
-	int useSize = GetUseSize();
 
 	int cFront = this->front;
 
 	int queueLen = this->mQueueLen;
-
-	/*
-	if (iSize > useSize)
-	{
-		int* ptr = nullptr;
-		*ptr = 10;
-		iSize = useSize;
-	}*/
-
 
 	int sizeCheck = cFront + iSize;
 
@@ -227,14 +217,10 @@ int CRingBuffer::Peek(char* chpDest, int iSize)
 		int addSize = iSize - directSize;
 
 		memcpy(&chpDest[directSize], &this->mRingBuffer[(cFront + 1) % queueLen], addSize);
-
-		//cFront = (cFront + addSize) % queueLen;
 	}
 	else
 	{
 		memcpy(chpDest, &this->mRingBuffer[cFront + 1], iSize);
-
-		//cFront = cFront + iSize;
 	}
 
 	return iSize;
