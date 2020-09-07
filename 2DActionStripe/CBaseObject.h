@@ -3,17 +3,17 @@ class CBaseObject
 {
 public:
 
-	
+
 	CBaseObject();
 
 	virtual ~CBaseObject();
-	
+
 	unsigned int GetX();
 
 	unsigned int GetY();
 
 	// KeyProcess() 에서 입력값을 받습니다.
-    // 어떤 액션을 할지 캐릭터 객체 멤버변수에 셋팅해준다. 
+	// 어떤 액션을 할지 캐릭터 객체 멤버변수에 셋팅해준다. 
 	void ActionInput(DWORD dwAction);
 
 	// 캐릭터의 위치를 셋팅해주는 함수입니다.
@@ -30,7 +30,7 @@ public:
 	//int GetSprite();
 
 	//int IsEndFrame();
-	
+
 	virtual void Render() = 0;
 
 	virtual void Update() = 0;
@@ -48,7 +48,7 @@ public:
 
 	// 사용자의 입력값을 처리하는 메시지
 	DWORD m_dwActionCur;
-	
+
 	unsigned int m_iXpos;
 
 	unsigned int m_iYpos;
@@ -68,7 +68,7 @@ public:
 
 	// 끝 스프라이트 값
 	DWORD m_dwSpriteEnd;
-	
+
 	// 오브젝트 ID
 	DWORD m_dwObjectID;
 
@@ -88,11 +88,6 @@ public:
 
 };
 
-// 백 버퍼의 가로 세로 길이 그리고 32 컬러비트
-extern CScreenDib ScreenDib;
-
-// 배열 최대개수와 컬러키 값 ARGB  -> 리틀 엔디안으로 BGRA
-extern CSpriteDib SpriteDib;
 
 
 template<class T>

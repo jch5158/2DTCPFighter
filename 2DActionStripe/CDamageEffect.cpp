@@ -1,5 +1,4 @@
-#include "framework.h"
-
+#include "stdafx.h"
 #include "CScreenDib.h"
 #include "CSpriteDib.h"
 #include "CBaseObject.h"

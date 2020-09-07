@@ -1,7 +1,12 @@
-#include "framework.h"
 
+#include "stdafx.h"
+#include "CBaseObject.h"
+#include "CPlayerObject.h"
+#include "2DActionStripe.h"
 #include "CSpriteDib.h"
 
+// 배열 최대개수와 컬러키 값 ARGB  -> 리틀 엔디안으로 ARGB
+CSpriteDib SpriteDib = CSpriteDib(e_SPRITE::eSPRITE_MAX, 0x00ffffff);
 
 
 CSpriteDib::CSpriteDib(int m_iMaxSprite,DWORD dwColorKey) 
@@ -135,7 +140,7 @@ void CSpriteDib::ReleaseStrite(int iSpriteIndex)
 }
 
 // 스프라이트 정보를 백버퍼에 그리는 함수입니다.
-void CSpriteDib::DrawSprite(int iSpriteIndex, short iDrawX, short iDrawY, BYTE* bytDest, int iDestWidth, int iDestHeight, int iDestPitch, int iDrawLen)
+void CSpriteDib::DrawSprite(int iSpriteIndex, short iDrawX, short iDrawY, BYTE* bytDest, int iDestWidth, int iDestHeight, int iDestPitch, int iDrawLen, void* playerPtr)
 {
 	// 인자값이 배열의 최대 길이보다 클 경우 return
 	if (iSpriteIndex >= m_iMaxSprite)
@@ -241,12 +246,26 @@ void CSpriteDib::DrawSprite(int iSpriteIndex, short iDrawX, short iDrawY, BYTE* 
 		for (int iCntX = 0; iSpriteWidth > iCntX; iCntX++)
 		{
 			// 이미지의 컬러키를 제외하고 그린다.
-			if(this->m_dwColorKey != (*dwpSprite & 0x00ffffff))
-			{		
-				
-				*dwpDest = *dwpSprite;		
+			if (this->m_dwColorKey != (*dwpSprite & 0x00ffffff))
+			{
+				// BGRA
+				if (playerObj == (CPlayerObject*)playerPtr)
+				{
+					BYTE argb[4];
+
+					memcpy_s(argb, 4, &(*dwpSprite), 4);
+
+					argb[0] *= 2;
+					
+					*dwpDest = *((DWORD*)argb);
+				}
+				else
+				{
+					*dwpDest = *dwpSprite;
+
+				}
 			}
-			
+
 			dwpDest++;
 			dwpSprite++;
 		}

@@ -1,5 +1,5 @@
-#include "framework.h"
 
+#include "stdafx.h"
 #include "CScreenDib.h"
 #include "CSpriteDib.h"
 #include "CBaseObject.h"
@@ -385,14 +385,13 @@ void CPlayerObject::Render()
 	int pitch = ScreenDib.GetPitch();
 
 	// 그림자
-	SpriteDib.DrawSprite(eSHADOW, this->m_iXpos, this->m_iYpos, pDestDib, DestWidth, DestHeight, pitch);
+	SpriteDib.DrawSprite(eSHADOW, this->m_iXpos, this->m_iYpos, pDestDib, DestWidth, DestHeight, pitch, 100);
 
 	// 현재 실행해야될 스프라이트 인덱스값이다.
-	SpriteDib.DrawSprite(this->m_dwSpriteNow, this->m_iXpos, this->m_iYpos, pDestDib, DestWidth, DestHeight, pitch);	
+	SpriteDib.DrawSprite(this->m_dwSpriteNow, this->m_iXpos, this->m_iYpos, pDestDib, DestWidth, DestHeight, pitch, 100, (void*)this);
 
 	// 채력 게이지
 	SpriteDib.DrawSprite(eGUAGE_HP, this->m_iXpos-35, this->m_iYpos+9, pDestDib, DestWidth, DestHeight, pitch,this->m_chHP);
-
 }
 
 // 체력을 셋팅해주는 함수입니다. 

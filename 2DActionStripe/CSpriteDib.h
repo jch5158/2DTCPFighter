@@ -37,7 +37,7 @@ public:
 
 	void ReleaseStrite(int iSpriteIndex);
 
-	void DrawSprite(int iSpriteIndex,  short iDrawX,  short iDrawY, BYTE* bytDest, int iDestWidth, int iDestHeight, int iDestPitch, int iDrawLen = 100);
+	void DrawSprite(int iSpriteIndex,  short iDrawX,  short iDrawY, BYTE* bytDest, int iDestWidth, int iDestHeight, int iDestPitch, int iDrawLen = 100, void* playerPtr = nullptr);
 
 	void DrawImage(int iSpriteIndex,  short iDrawX,  short iDrawY, BYTE* bytDest, int iDestWidth, int iDestHeight, int iDestPitch, int iDrawLen = 100);
 
@@ -53,3 +53,5 @@ protected:
 	// 컬러키입니다.
 	DWORD m_dwColorKey;
 };
+
+extern CSpriteDib SpriteDib;

@@ -1,7 +1,10 @@
 
-#include <Windows.h>
-#include <iostream>
+#include "stdafx.h"
 #include "CScreenDib.h"
+
+// 백 버퍼의 가로 세로 길이 그리고 32 컬러비트
+CScreenDib ScreenDib = CScreenDib(640, 480, 32);
+
 
 // 백버퍼를 셋팅해준다.
 CScreenDib::CScreenDib(int iWidth, int iHeight, int iColorBit) :m_iWidth(iWidth), m_iHeight(iHeight), m_iColorBit(iColorBit)

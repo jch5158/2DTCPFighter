@@ -52,3 +52,5 @@ protected:
 };
 
 
+// 백 버퍼의 가로 세로 길이 그리고 32 컬러비트
+extern CScreenDib ScreenDib;

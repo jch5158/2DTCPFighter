@@ -1,16 +1,10 @@
-#include "framework.h"
-
-#include "CScreenDib.h"
+#include "stdafx.h"
 #include "CSpriteDib.h"
+#include "CScreenDib.h"
 #include "CBaseObject.h"
 #include "CPlayerObject.h"
 
 
-// 백 버퍼의 가로 세로 길이 그리고 32 컬러비트
-CScreenDib ScreenDib = CScreenDib(640, 480, 32);;
-
-// 배열 최대개수와 컬러키값 ARGR
-CSpriteDib SpriteDib = CSpriteDib(e_SPRITE::eSPRITE_MAX, 0x00ffffff);
 
 
 void CBaseObject::SetSprite(DWORD dwSpriteStart, DWORD dwSpriteEnd, DWORD dwFrameDelay)

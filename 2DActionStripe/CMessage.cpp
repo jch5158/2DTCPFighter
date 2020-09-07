@@ -1,4 +1,4 @@
-#include "framework.h"
+#include "stdafx.h"
 #include "CExceptionObject.h"
 #include "CMessage.h"
 

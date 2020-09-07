@@ -1,21 +1,19 @@
 ﻿// 2DActionStripe.cpp : 애플리케이션에 대한 진입점을 정의합니다.
 //
 
-#define _CRT_SECURE_NO_WARNINGS
-#define _WINSOCK_DEPRECATED_NO_WARNINGS
-
+#include "stdafx.h"
 #include "framework.h"
 #include "protocol.h"
 #include "CMessage.h"
 #include "CExceptionObject.h"
 #include "CSpriteDib.h"
 #include "CScreenDib.h"
-#include "2DActionStripe.h"
 #include "CRingBuffer.h"
 #include "CFrameSkip.h"
 #include "CBaseObject.h"
 #include "CDamageEffect.h"
 #include "CPlayerObject.h"
+#include "2DActionStripe.h"
 
 #define WM_NETWORK (WM_USER+1)
 
@@ -130,17 +128,13 @@ HWND g_hWnd;
 // 윈도우 상태 체크
 bool windowActive;
 
+CPlayerObject* playerObj = new CPlayerObject;
 
 // 게임씬 바로 도입
 enum e_GameScene GameState = e_GameScene::GAME;
 
 
-CPlayerObject* playerObj = new CPlayerObject;
-
-
-
 std::list<CBaseObject*> objList;
-
 
 // 프레임 스킵 함수를 호출하는 객체입니다.
 CFrameSkip frameSkip;
@@ -155,7 +149,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     UNREFERENCED_PARAMETER(hPrevInstance);
     UNREFERENCED_PARAMETER(lpCmdLine);
 
-    
+
     timeBeginPeriod(1);
     
     // 전역 문자열을 초기화합니다.

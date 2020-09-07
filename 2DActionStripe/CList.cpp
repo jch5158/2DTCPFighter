@@ -1,3 +1,2 @@
-#include "framework.h"
-
+#include "stdafx.h"
 #include "CList.h"
