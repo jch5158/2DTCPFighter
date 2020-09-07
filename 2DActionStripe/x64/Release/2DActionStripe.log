@@ -1,7 +1,22 @@
-﻿  CSpriteDib.cpp
+﻿  stdafx.cpp
+  2DActionStripe.cpp
+  CBaseObject.cpp
+  CDamageEffect.cpp
+  CExceptionObject.cpp
+C:\Users\jch35\source\repos\2DActionStripe\2DActionStripe\CExceptionObject.cpp(20,29): warning C4154: 배열 식을 삭제했습니다. 포인터로 변환이 제공됩니다.
+C:\Users\jch35\source\repos\2DActionStripe\2DActionStripe\CExceptionObject.cpp(21,31): warning C4154: 배열 식을 삭제했습니다. 포인터로 변환이 제공됩니다.
+  CFrameSkip.cpp
+  CFreeList.cpp
+  CList.cpp
+  CMessage.cpp
+  CPlayerObject.cpp
+  CRingBuffer.cpp
+  CScreenDib.cpp
+  CSpriteDib.cpp
+  protocol.cpp
   코드를 생성하고 있습니다.
-  1 of 208 functions ( 0.5%) were compiled, the rest were copied from previous compilation.
+  0 of 208 functions ( 0.0%) were compiled, the rest were copied from previous compilation.
     0 functions were new in current compilation
-    2 functions had inline decision re-evaluated but remain unchanged
+    0 functions had inline decision re-evaluated but remain unchanged
   코드를 생성했습니다.
   2DActionStripe.vcxproj -> C:\Users\jch35\source\repos\2DActionStripe\x64\Release\2DActionStripe.exe
