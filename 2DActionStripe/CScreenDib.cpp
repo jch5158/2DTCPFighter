@@ -3,12 +3,13 @@
 #include <iostream>
 #include "CScreenDib.h"
 
-
+// 백버퍼를 셋팅해준다.
 CScreenDib::CScreenDib(int iWidth, int iHeight, int iColorBit) :m_iWidth(iWidth), m_iHeight(iHeight), m_iColorBit(iColorBit)
 {
 	// 32비트 기반의 피치를 계산합니다.
 	this->m_iPitch = ((this->m_iWidth * (m_iColorBit / 8)) + 3) & ~3;
 
+	// 구조체의 크기만큼 셋팅해준다.
 	this->m_stDibInfoh.biSize = sizeof(BITMAPINFOHEADER);
 
 	// 가로 길이
@@ -16,8 +17,7 @@ CScreenDib::CScreenDib(int iWidth, int iHeight, int iColorBit) :m_iWidth(iWidth)
 	
 	// 세로 길이 
 	this->m_stDibInfoh.biHeight = -iHeight;
-	
-	
+		
 	this->m_stDibInfoh.biPlanes = 1;
 	
 	// 몇비트 컬러인지 확인
@@ -26,6 +26,7 @@ CScreenDib::CScreenDib(int iWidth, int iHeight, int iColorBit) :m_iWidth(iWidth)
 	// 압축유형 bmp파일은 압축을 하지않음 
 	this->m_stDibInfoh.biCompression = BI_RGB;
 
+	// 피지 * 높이만큼 동적할당해준다.
 	CreateDibBuffer(m_iWidth, m_iHeight, m_iColorBit);
 }
 
@@ -50,6 +51,7 @@ void CScreenDib::ReleaseDibBuffer(void) {
 	delete[] m_bypBuffer;
 }
 
+// 플립 호출시 백버퍼에 그린 값을 출력한다.
 void CScreenDib::Filp(HWND hWnd, int iX, int iY) {
 
 	// 윈도우 핸들로 dc
@@ -72,7 +74,6 @@ void CScreenDib::Filp(HWND hWnd, int iX, int iY) {
 		DIB_RGB_COLORS,                          // DIB_RGB_COLORS , RGB 빨레트로 별로 쓸모가 없당.
 		SRCCOPY                                  // 출력모드
 	);
-
 	
 	static DWORD frameCheck = 50;
 
@@ -98,25 +99,27 @@ void CScreenDib::Filp(HWND hWnd, int iX, int iY) {
 	TextOut(hdc, 0, 0, text, 2);
 
 	ReleaseDC(hWnd, hdc);
-
-
 }
 
+// 백 버퍼의 포인터를 return 한다.
 BYTE* CScreenDib::GetDibBuffer()
 {
 	return this->m_bypBuffer;
 }
 
+// 백 버퍼의 가로 길이를 return한다.
 int CScreenDib::GetWidth(void) 
 {
 	return this->m_iWidth;
 }
 
+// 백 버퍼의 세로 길이를 return 한다.
 int CScreenDib::GetHeight(void) 
 {
 	return this->m_iHeight;
 }
 
+// 백 버퍼의 pitch를 return한다.
 int CScreenDib::GetPitch(void) 
 {
 	return this->m_iPitch;

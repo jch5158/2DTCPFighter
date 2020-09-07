@@ -112,7 +112,7 @@ void CPlayerObject::InputActionProc()
 
 	case KeyList::eACTION_MOVE_DD:
 
-		if (this->m_iYpos < 477)
+		if (this->m_iYpos < 467)
 		{
 			this->m_iYpos += 2;
 		}

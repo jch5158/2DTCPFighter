@@ -1,9 +1,11 @@
 #pragma once
 
+// 백버퍼를 만들고 백버퍼를 Filp하여 유저 화면을 갱신합니다.
 class CScreenDib
 {
 public:
 
+	// 백 버퍼의 가로 세로 길이 그리고 32 컬러비트
 	CScreenDib(int iWidth, int iHeight, int iColorBit);
 
 	virtual ~CScreenDib();

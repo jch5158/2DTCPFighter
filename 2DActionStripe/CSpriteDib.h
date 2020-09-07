@@ -1,4 +1,7 @@
 #pragma once
+
+
+//StripteDib 는 이미지 정보를 받아서 백버퍼에 그리기 위한 클래스입니다.
 class CSpriteDib
 {
 

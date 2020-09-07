@@ -9,7 +9,7 @@
 // 백 버퍼의 가로 세로 길이 그리고 32 컬러비트
 CScreenDib ScreenDib = CScreenDib(640, 480, 32);;
 
-// 배열 최대개수와 컬러키 값 ARGB  -> 리틀 엔디안으로 BGRA
+// 배열 최대개수와 컬러키값 ARGR
 CSpriteDib SpriteDib = CSpriteDib(e_SPRITE::eSPRITE_MAX, 0x00ffffff);
 
 

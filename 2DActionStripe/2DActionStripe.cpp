@@ -8,11 +8,11 @@
 #include "protocol.h"
 #include "CMessage.h"
 #include "CExceptionObject.h"
+#include "CSpriteDib.h"
+#include "CScreenDib.h"
 #include "2DActionStripe.h"
 #include "CRingBuffer.h"
 #include "CFrameSkip.h"
-#include "CSpriteDib.h"
-#include "CScreenDib.h"
 #include "CBaseObject.h"
 #include "CDamageEffect.h"
 #include "CPlayerObject.h"
@@ -138,6 +138,7 @@ enum e_GameScene GameState = e_GameScene::GAME;
 CPlayerObject* playerObj = new CPlayerObject;
 
 
+
 std::list<CBaseObject*> objList;
 
 
@@ -154,8 +155,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     UNREFERENCED_PARAMETER(hPrevInstance);
     UNREFERENCED_PARAMETER(lpCmdLine);
 
-    // TODO: 여기에 코드를 입력합니다.
-
+    
     timeBeginPeriod(1);
     
     // 전역 문자열을 초기화합니다.
@@ -394,23 +394,6 @@ BOOL InitialGame(void) {
     SpriteDib.LoadDibSprite(e_SPRITE::eGUAGE_HP,           "image/HPGuage.bmp", 0, 0);
     SpriteDib.LoadDibSprite(e_SPRITE::eSHADOW,             "image/Shadow.bmp", 32, 4);
     
-    
-    /*playerObj->SetPosition(320, 240);
-
-    objList.PushBack(playerObj);
-*/
-
-//    CBaseObject* playerObjEnemy; 
-
-    //// 캐릭터 오브젝트를 생성한다.
-    //playerObjEnemy = new CPlayerObject(); 
-   
-    //// 생성한 캐릭터의 좌표를 설정한다.
-    //playerObjEnemy->SetPosition(150, 150);
-   
-    //// 이터레이터에 생성한 캐릭터 오브젝트를 푸쉬한다.
-    //objList.PushBack(playerObjEnemy); 
-
     return true;
 }
 
@@ -429,18 +412,11 @@ BOOL Render(void)
     int pitch = ScreenDib.GetPitch();
 
 
-    // 백버퍼에 그리기
+    // 백버퍼에 배경 이미지를 셋팅한다. 
     SpriteDib.DrawImage(0, 0, 0, pDestDib, DestWidth, DestHeight, pitch);
 
     ListYaxixSort();
-    
-    /*CList<CBaseObject*>::Iterator iterE = objList.end();
-
-    for (CList<CBaseObject*>::Iterator iter = objList.begin(); iter != iterE; ++iter)
-    {
-        iter->Render(); 
-    } */
-
+     
     auto iterE = objList.end();
 
     for (auto iter = objList.begin(); iter != iterE; ++iter)
@@ -453,15 +429,9 @@ BOOL Render(void)
     return true;
 }
 
-void Update(void) {
-
-    /*CList<CBaseObject*>::Iterator iterE = objList.end();
-
-    for (CList<CBaseObject*>::Iterator iter = objList.begin(); iter != iterE; ++iter)
-    {
-        iter->Update();
-    }*/
-
+void Update(void) 
+{
+ 
     auto iterE = objList.end();
 
     for (auto iter = objList.begin(); iter != iterE; ++iter)
@@ -635,9 +605,7 @@ void SendProc()
     //stPacketCsAttack2 attack2;
     //stPacketCsAttack3 attack3;
 
-
     CMessage message;
-
 
     switch (playerObj->m_dwActionCur)
     {
